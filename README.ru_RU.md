@@ -107,6 +107,77 @@ systemctl restart x-ui
 
 Исходный файл SQLite остаётся нетронутым; удалите его вручную после проверки нового бэкенда.
 
+### Редактирование правил маршрутизации подписки (`subJsonRules`) через SQLite
+
+Инструкция только для установки с **SQLite** (`/etc/x-ui/x-ui.db`). На время правки базы лучше не менять настройки в панели параллельно.
+
+#### 📦 1. Установка `sqlite3` на сервер
+
+**Ubuntu / Debian:**
+
+```bash
+apt update
+apt install sqlite3 -y
+```
+
+Проверка:
+
+```bash
+sqlite3 --version
+```
+
+#### 📂 2. Открыть базу 3X-UI
+
+Файл базы: `/etc/x-ui/x-ui.db`
+
+```bash
+sqlite3 /etc/x-ui/x-ui.db
+```
+
+#### 🔍 3. Проверить, что всё в порядке
+
+Внутри `sqlite3`:
+
+```sql
+.tables
+```
+
+Должны отображаться таблицы `settings`, `inbounds` и другие.
+
+#### 📥 4. Посмотреть текущие правила подписки
+
+```sql
+SELECT value FROM settings WHERE key='subJsonRules';
+```
+
+Скопируйте результат — это резервная копия на случай отката.
+
+#### ✏️ 5. Обновить rules (добавить домены)
+
+Подставьте свой JSON при необходимости. Пример синхронизирован с [`amnezia_sites.json`](amnezia_sites.json) (список Amnezia): каждый `hostname` → правило `domain:`, уникальные IP из файла — запасной вариант. Базовые правила: `2ip.ru` / `mp-raketa.ru` → proxy; `geoip:private` + `geoip:ru` и `geosite:category-ru` → direct; остальное → proxy.
+
+Пересобрать JSON после правки `amnezia_sites.json`: `node scripts/gen-sub-json-rules.mjs`
+
+```sql
+UPDATE settings
+SET value='[{"type":"field","domain":["domain:2ip.ru","domain:mp-raketa.ru"],"network":"tcp,udp","outboundTag":"proxy"},{"type":"field","ip":["geoip:private","geoip:ru"],"outboundTag":"direct"},{"type":"field","domain":["geosite:category-ru","domain:xn--p1ai","domain:by","keyword:kinozal","keyword:nnmclub","domain:a.wb.ru","domain:am.wildberries.ru","domain:api.plus.kinopoisk.ru","domain:app.e-comet.io","domain:avatars.mds.yandex.net","domain:basket-38.wbbasket.ru","domain:by.wildberries.ru","domain:career.hh.ru","domain:cdn-assets.setka.ru","domain:cdn.setka.ru","domain:cdn.uxfeedback.ru","domain:cdn.wbbasket.ru","domain:cdn1.ozonusercontent.com","domain:cdn2.ozone.ru","domain:chat-prod.wildberries.ru","domain:chat.e-comet.io","domain:chat.wildberries.ru","domain:cmp-new.wildberries.ru","domain:cmp.wildberries.ru","domain:data-checker.wildberries.ru","domain:delivery-bt.wildberries.ru","domain:disk.hh.ru","domain:e-comet.io","domain:ext-strm-rukzn04mts-01.strm.yandex.net","domain:graphql.kinopoisk.ru","domain:hd.kinopoisk.ru","domain:hh.ru","domain:hhcdn.ru","domain:highlight.wildberries.ru","domain:i.hh.ru","domain:identical-products.wildberries.ru","domain:installments-aggregator-bt.wildberries.ru","domain:ir-11.ozone.ru","domain:ir.ozone.ru","domain:journal-bt.wildberries.ru","domain:kg.wildberries.ru","domain:kz.wildberries.ru","domain:log.strm.yandex.ru","domain:marketplace-sentry.wb.ru","domain:mc.yandex.com","domain:mc.yandex.ru","domain:ozon.by","domain:ozon.ru","domain:points.wb.ru","domain:questions.wildberries.ru","domain:seller-auth.wildberries.ru","domain:seller.ozon.ru","domain:seller.wildberries.ru","domain:setka.ru","domain:st.ozone.ru","domain:static-basket-01.wbbasket.ru","domain:static-mon.yandex.net","domain:strm.yandex.ru","domain:suppliers-shipment-2.wildberries.ru","domain:tracking.ott.yandex.net","domain:user-features.wb.ru","domain:userstorage-02adm.wb.ru","domain:v-1.ozone.ru","domain:wbx-bell-v3.wildberries.ru","domain:wbxoofex.wildberries.ru","domain:wildberries.by","domain:wildberries.ru","domain:www.ozon.ru","domain:www.wildberries.by","domain:www.wildberries.ru","domain:xapi.ozon.ru","domain:yandex.ru","domain:yastatic.net"],"outboundTag":"direct"},{"type":"field","network":"tcp,udp","outboundTag":"proxy"}]'
+WHERE key='subJsonRules';
+```
+
+Те же правила можно задать в панели: **Настройки → Форматы подписки**, если включён JSON-формат подписки.
+
+#### 💾 6. Выйти из `sqlite3`
+
+```text
+.exit
+```
+
+#### 🔄 7. Перезапустить 3X-UI
+
+```bash
+systemctl restart x-ui
+```
+
 ### Docker
 
 Команда по умолчанию `docker compose up -d` продолжает использовать SQLite. Чтобы запустить со встроенным сервисом PostgreSQL, раскомментируйте две строки переменных окружения `XUI_DB_*` в `docker-compose.yml` и запустите с профилем:

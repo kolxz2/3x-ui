@@ -1,0 +1,282 @@
+[
+    {
+        "hostname": "\text-strm-rukzn04mts-01.strm.yandex.net",
+        "ip": ""
+    },
+    {
+        "hostname": "\tinstallments-aggregator-bt.wildberries.ru",
+        "ip": ""
+    },
+    {
+        "hostname": "a.wb.ru",
+        "ip": "85.198.78.11"
+    },
+    {
+        "hostname": "am.wildberries.ru",
+        "ip": "185.138.253.40"
+    },
+    {
+        "hostname": "api.plus.kinopoisk.ru",
+        "ip": "87.250.250.204"
+    },
+    {
+        "hostname": "app.e-comet.io",
+        "ip": "111.88.247.97"
+    },
+    {
+        "hostname": "avatars.mds.yandex.net",
+        "ip": "87.250.247.181"
+    },
+    {
+        "hostname": "basket-38.wbbasket.ru",
+        "ip": "85.198.79.164"
+    },
+    {
+        "hostname": "by.wildberries.ru",
+        "ip": "185.138.253.2"
+    },
+    {
+        "hostname": "career.hh.ru",
+        "ip": "94.124.200.1"
+    },
+    {
+        "hostname": "cdn-assets.setka.ru",
+        "ip": "188.72.103.3"
+    },
+    {
+        "hostname": "cdn.setka.ru",
+        "ip": "188.72.103.3"
+    },
+    {
+        "hostname": "cdn.uxfeedback.ru",
+        "ip": "188.72.103.3"
+    },
+    {
+        "hostname": "cdn.wbbasket.ru",
+        "ip": "213.184.155.75"
+    },
+    {
+        "hostname": "cdn1.ozonusercontent.com",
+        "ip": "185.73.195.116"
+    },
+    {
+        "hostname": "chat-prod.wildberries.ru",
+        "ip": "185.62.202.8"
+    },
+    {
+        "hostname": "chat.e-comet.io",
+        "ip": "51.250.30.1"
+    },
+    {
+        "hostname": "chat.wildberries.ru",
+        "ip": "185.62.202.8"
+    },
+    {
+        "hostname": "cmp-new.wildberries.ru",
+        "ip": "185.62.202.8"
+    },
+    {
+        "hostname": "cmp.wildberries.ru",
+        "ip": "185.62.202.8"
+    },
+    {
+        "hostname": "data-checker.wildberries.ru",
+        "ip": "185.138.253.20"
+    },
+    {
+        "hostname": "delivery-bt.wildberries.ru",
+        "ip": "213.184.155.145"
+    },
+    {
+        "hostname": "disk.hh.ru",
+        "ip": "94.124.200.1"
+    },
+    {
+        "hostname": "e-comet.io",
+        "ip": "188.72.111.52"
+    },
+    {
+        "hostname": "ext-strm-rukzn04mts-01.strm.yandex.net",
+        "ip": "212.30.134.36"
+    },
+    {
+        "hostname": "graphql.kinopoisk.ru",
+        "ip": "77.88.21.175"
+    },
+    {
+        "hostname": "hd.kinopoisk.ru",
+        "ip": "213.180.199.9"
+    },
+    {
+        "hostname": "hh.ru",
+        "ip": "94.124.200.0"
+    },
+    {
+        "hostname": "hhcdn.ru",
+        "ip": "94.124.200.0"
+    },
+    {
+        "hostname": "highlight.wildberries.ru",
+        "ip": "185.62.202.9"
+    },
+    {
+        "hostname": "i.hh.ru",
+        "ip": "94.124.200.0"
+    },
+    {
+        "hostname": "identical-products.wildberries.ru",
+        "ip": "85.198.79.73"
+    },
+    {
+        "hostname": "ir.ozone.ru",
+        "ip": "185.73.193.119"
+    },
+    {
+        "hostname": "journal-bt.wildberries.ru",
+        "ip": "185.138.255.20"
+    },
+    {
+        "hostname": "kg.wildberries.ru",
+        "ip": "213.184.155.68"
+    },
+    {
+        "hostname": "kz.wildberries.ru",
+        "ip": "185.138.253.40"
+    },
+    {
+        "hostname": "log.strm.yandex.ru",
+        "ip": "87.250.251.15"
+    },
+    {
+        "hostname": "marketplace-sentry.wb.ru",
+        "ip": "185.62.202.8"
+    },
+    {
+        "hostname": "mc.yandex.com",
+        "ip": "77.88.21.119"
+    },
+    {
+        "hostname": "mc.yandex.ru",
+        "ip": "87.250.250.119"
+    },
+    {
+        "hostname": "ozon.by",
+        "ip": "185.73.195.108"
+    },
+    {
+        "hostname": "ozon.ru",
+        "ip": "185.73.193.68"
+    },
+    {
+        "hostname": "points.wb.ru",
+        "ip": "85.198.77.15"
+    },
+    {
+        "hostname": "questions.wildberries.ru",
+        "ip": "185.138.255.1"
+    },
+    {
+        "hostname": "seller-auth.wildberries.ru",
+        "ip": "194.1.214.253"
+    },
+    {
+        "hostname": "seller.ozon.ru",
+        "ip": "185.73.193.68"
+    },
+    {
+        "hostname": "seller.wildberries.ru",
+        "ip": "194.1.214.253"
+    },
+    {
+        "hostname": "setka.ru",
+        "ip": "31.44.9.64"
+    },
+    {
+        "hostname": "st.ozone.ru",
+        "ip": "185.73.195.117"
+    },
+    {
+        "hostname": "static-basket-01.wbbasket.ru",
+        "ip": "85.198.79.24"
+    },
+    {
+        "hostname": "static-mon.yandex.net",
+        "ip": "87.250.251.92"
+    },
+    {
+        "hostname": "strm.yandex.ru",
+        "ip": "87.250.254.45"
+    },
+    {
+        "hostname": "suppliers-shipment-2.wildberries.ru",
+        "ip": "85.198.79.101"
+    },
+    {
+        "hostname": "tracking.ott.yandex.net",
+        "ip": "87.250.250.44"
+    },
+    {
+        "hostname": "user-features.wb.ru",
+        "ip": "85.198.79.73"
+    },
+    {
+        "hostname": "userstorage-02adm.wb.ru",
+        "ip": "213.184.156.46"
+    },
+    {
+        "hostname": "v-1.ozone.ru",
+        "ip": "185.73.194.117"
+    },
+    {
+        "hostname": "wbx-bell-v3.wildberries.ru",
+        "ip": "213.184.159.0"
+    },
+    {
+        "hostname": "wbxoofex.wildberries.ru",
+        "ip": "185.62.202.8"
+    },
+    {
+        "hostname": "wildberries.by",
+        "ip": "185.179.80.73"
+    },
+    {
+        "hostname": "wildberries.ru",
+        "ip": "185.62.202.2"
+    },
+    {
+        "hostname": "www.ozon.ru",
+        "ip": "185.73.193.68"
+    },
+    {
+        "hostname": "www.wildberries.by",
+        "ip": "185.179.80.73"
+    },
+    {
+        "hostname": "www.wildberries.ru",
+        "ip": "185.62.202.2"
+    },
+    {
+        "hostname": "xapi.ozon.ru",
+        "ip": "185.73.194.77"
+    },
+    {
+        "hostname": "yandex.ru",
+        "ip": "77.88.55.88"
+    },
+    {
+        "hostname": "yastatic.net",
+        "ip": "37.9.64.225"
+    },
+    {
+        "hostname": "ir-11.ozone.ru",
+        "ip": "79.135.238.114"
+    },
+    {
+        "hostname": "cdn2.ozone.ru",
+        "ip": "185.73.195.117"
+    },
+    {
+        "hostname": "www.ozon.ru",
+        "ip": "185.73.194.82"
+    }
+]
