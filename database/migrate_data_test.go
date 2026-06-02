@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/database/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"

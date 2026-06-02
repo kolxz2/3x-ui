@@ -5,10 +5,10 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/logger"
-	"github.com/mhsanaei/3x-ui/v3/web/middleware"
-	"github.com/mhsanaei/3x-ui/v3/web/service"
-	"github.com/mhsanaei/3x-ui/v3/web/session"
+	"github.com/kolxz2/3x-ui/v3/logger"
+	"github.com/kolxz2/3x-ui/v3/web/middleware"
+	"github.com/kolxz2/3x-ui/v3/web/service"
+	"github.com/kolxz2/3x-ui/v3/web/session"
 
 	"github.com/gin-gonic/gin"
 )

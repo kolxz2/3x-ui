@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/database/model"
-	"github.com/mhsanaei/3x-ui/v3/web/middleware"
-	"github.com/mhsanaei/3x-ui/v3/web/service"
-	"github.com/mhsanaei/3x-ui/v3/web/session"
-	"github.com/mhsanaei/3x-ui/v3/web/websocket"
+	"github.com/kolxz2/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/web/middleware"
+	"github.com/kolxz2/3x-ui/v3/web/service"
+	"github.com/kolxz2/3x-ui/v3/web/session"
+	"github.com/kolxz2/3x-ui/v3/web/websocket"
 
 	"github.com/gin-gonic/gin"
 )

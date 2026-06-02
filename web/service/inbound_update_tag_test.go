@@ -3,8 +3,8 @@ package service
 import (
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/database"
-	"github.com/mhsanaei/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/database"
+	"github.com/kolxz2/3x-ui/v3/database/model"
 )
 
 // changing an inbound's port must re-derive an auto-generated tag, both in

@@ -17,11 +17,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/database"
-	"github.com/mhsanaei/3x-ui/v3/database/model"
-	"github.com/mhsanaei/3x-ui/v3/util/common"
-	"github.com/mhsanaei/3x-ui/v3/util/netsafe"
-	"github.com/mhsanaei/3x-ui/v3/web/runtime"
+	"github.com/kolxz2/3x-ui/v3/database"
+	"github.com/kolxz2/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/util/common"
+	"github.com/kolxz2/3x-ui/v3/util/netsafe"
+	"github.com/kolxz2/3x-ui/v3/web/runtime"
 )
 
 type HeartbeatPatch struct {

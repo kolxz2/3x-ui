@@ -16,11 +16,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/config"
-	"github.com/mhsanaei/3x-ui/v3/database/model"
-	"github.com/mhsanaei/3x-ui/v3/util/crypto"
-	"github.com/mhsanaei/3x-ui/v3/util/random"
-	"github.com/mhsanaei/3x-ui/v3/xray"
+	"github.com/kolxz2/3x-ui/v3/config"
+	"github.com/kolxz2/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/util/random"
+	"github.com/kolxz2/3x-ui/v3/xray"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"

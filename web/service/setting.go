@@ -12,15 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/database"
-	"github.com/mhsanaei/3x-ui/v3/database/model"
-	"github.com/mhsanaei/3x-ui/v3/logger"
-	"github.com/mhsanaei/3x-ui/v3/util/common"
-	"github.com/mhsanaei/3x-ui/v3/util/netproxy"
-	"github.com/mhsanaei/3x-ui/v3/util/random"
-	"github.com/mhsanaei/3x-ui/v3/util/reflect_util"
-	"github.com/mhsanaei/3x-ui/v3/web/entity"
-	"github.com/mhsanaei/3x-ui/v3/xray"
+	"github.com/kolxz2/3x-ui/v3/database"
+	"github.com/kolxz2/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/logger"
+	"github.com/kolxz2/3x-ui/v3/util/common"
+	"github.com/kolxz2/3x-ui/v3/util/netproxy"
+	"github.com/kolxz2/3x-ui/v3/util/random"
+	"github.com/kolxz2/3x-ui/v3/util/reflect_util"
+	"github.com/kolxz2/3x-ui/v3/web/entity"
+	"github.com/kolxz2/3x-ui/v3/xray"
 )
 
 //go:embed config.json

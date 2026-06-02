@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/config"
+	"github.com/kolxz2/3x-ui/v3/config"
 	"github.com/op/go-logging"
 
 	"gopkg.in/natefinch/lumberjack.v2"

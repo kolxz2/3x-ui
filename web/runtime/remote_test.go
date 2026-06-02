@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/database/model"
 )
 
 // cacheGetTag must resolve a remote inbound id even when the n<id>- prefix

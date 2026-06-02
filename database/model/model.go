@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/util/json_util"
-	"github.com/mhsanaei/3x-ui/v3/xray"
+	"github.com/kolxz2/3x-ui/v3/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/xray"
 )
 
 // Protocol represents the protocol type for Xray inbounds.

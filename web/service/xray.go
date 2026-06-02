@@ -8,11 +8,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mhsanaei/3x-ui/v3/config"
-	"github.com/mhsanaei/3x-ui/v3/database/model"
-	"github.com/mhsanaei/3x-ui/v3/logger"
-	"github.com/mhsanaei/3x-ui/v3/util/json_util"
-	"github.com/mhsanaei/3x-ui/v3/xray"
+	"github.com/kolxz2/3x-ui/v3/config"
+	"github.com/kolxz2/3x-ui/v3/database/model"
+	"github.com/kolxz2/3x-ui/v3/logger"
+	"github.com/kolxz2/3x-ui/v3/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/xray"
 
 	"go.uber.org/atomic"
 )
