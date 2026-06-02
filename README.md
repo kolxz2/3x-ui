@@ -128,6 +128,77 @@ systemctl restart x-ui
 
 The source SQLite file is left untouched; remove it manually once you have verified the new backend.
 
+### Editing subscription JSON routing rules (`subJsonRules`) via SQLite
+
+These steps apply only when the panel uses the default **SQLite** backend (`/etc/x-ui/x-ui.db`). Stop or avoid concurrent panel writes while editing the database.
+
+#### 1. Install `sqlite3` on the server
+
+**Ubuntu / Debian:**
+
+```bash
+apt update
+apt install sqlite3 -y
+```
+
+Verify:
+
+```bash
+sqlite3 --version
+```
+
+#### 2. Open the 3X-UI database
+
+Database file: `/etc/x-ui/x-ui.db`
+
+```bash
+sqlite3 /etc/x-ui/x-ui.db
+```
+
+#### 3. Verify the database
+
+Inside the `sqlite3` shell:
+
+```sql
+.tables
+```
+
+You should see tables such as `settings`, `inbounds`, and others.
+
+#### 4. Back up the current subscription rules
+
+```sql
+SELECT value FROM settings WHERE key='subJsonRules';
+```
+
+Copy the result before making changes — this is your backup.
+
+#### 5. Update routing rules (add domains)
+
+Replace the value below with your own JSON if needed. The example is synced from [`amnezia_sites.json`](amnezia_sites.json) (Amnezia split-tunnel list): each hostname becomes a `domain:` rule; unique resolved IPs from that file are included as a fallback. Base rules: `2ip.ru` / `mp-raketa.ru` → proxy; `geoip:private` + `geoip:ru` and `geosite:category-ru` → direct; everything else → proxy.
+
+To regenerate the JSON after editing `amnezia_sites.json`: `node scripts/gen-sub-json-rules.mjs`
+
+```sql
+UPDATE settings
+SET value='[{"type":"field","domain":["domain:2ip.ru","domain:mp-raketa.ru"],"network":"tcp,udp","outboundTag":"proxy"},{"type":"field","ip":["geoip:private","geoip:ru"],"outboundTag":"direct"},{"type":"field","domain":["geosite:category-ru","domain:xn--p1ai","domain:by","keyword:kinozal","keyword:nnmclub","domain:a.wb.ru","domain:am.wildberries.ru","domain:api.plus.kinopoisk.ru","domain:app.e-comet.io","domain:avatars.mds.yandex.net","domain:basket-38.wbbasket.ru","domain:by.wildberries.ru","domain:career.hh.ru","domain:cdn-assets.setka.ru","domain:cdn.setka.ru","domain:cdn.uxfeedback.ru","domain:cdn.wbbasket.ru","domain:cdn1.ozonusercontent.com","domain:cdn2.ozone.ru","domain:chat-prod.wildberries.ru","domain:chat.e-comet.io","domain:chat.wildberries.ru","domain:cmp-new.wildberries.ru","domain:cmp.wildberries.ru","domain:data-checker.wildberries.ru","domain:delivery-bt.wildberries.ru","domain:disk.hh.ru","domain:e-comet.io","domain:ext-strm-rukzn04mts-01.strm.yandex.net","domain:graphql.kinopoisk.ru","domain:hd.kinopoisk.ru","domain:hh.ru","domain:hhcdn.ru","domain:highlight.wildberries.ru","domain:i.hh.ru","domain:identical-products.wildberries.ru","domain:installments-aggregator-bt.wildberries.ru","domain:ir-11.ozone.ru","domain:ir.ozone.ru","domain:journal-bt.wildberries.ru","domain:kg.wildberries.ru","domain:kz.wildberries.ru","domain:log.strm.yandex.ru","domain:marketplace-sentry.wb.ru","domain:mc.yandex.com","domain:mc.yandex.ru","domain:ozon.by","domain:ozon.ru","domain:points.wb.ru","domain:questions.wildberries.ru","domain:seller-auth.wildberries.ru","domain:seller.ozon.ru","domain:seller.wildberries.ru","domain:setka.ru","domain:st.ozone.ru","domain:static-basket-01.wbbasket.ru","domain:static-mon.yandex.net","domain:strm.yandex.ru","domain:suppliers-shipment-2.wildberries.ru","domain:tracking.ott.yandex.net","domain:user-features.wb.ru","domain:userstorage-02adm.wb.ru","domain:v-1.ozone.ru","domain:wbx-bell-v3.wildberries.ru","domain:wbxoofex.wildberries.ru","domain:wildberries.by","domain:wildberries.ru","domain:www.ozon.ru","domain:www.wildberries.by","domain:www.wildberries.ru","domain:xapi.ozon.ru","domain:yandex.ru","domain:yastatic.net"],"outboundTag":"direct"},{"type":"field","network":"tcp,udp","outboundTag":"proxy"}]'
+WHERE key='subJsonRules';
+```
+
+You can also edit these rules in the panel under **Settings → Subscription formats** when the JSON subscription format is enabled.
+
+#### 6. Exit `sqlite3`
+
+```text
+.exit
+```
+
+#### 7. Restart 3X-UI
+
+```bash
+systemctl restart x-ui
+```
+
 ### Docker
 
 The default `docker compose up -d` keeps using SQLite. To run with the bundled PostgreSQL service, uncomment the two `XUI_DB_*` env lines in `docker-compose.yml` and start with the profile:
