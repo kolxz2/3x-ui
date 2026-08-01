@@ -240,6 +240,97 @@ The panel UI is available in 13 languages:
 
 English · فارسی · العربية · 中文（简体） · 中文（繁體） · Español · Русский · Українська · Türkçe · Tiếng Việt · 日本語 · Bahasa Indonesia · Português (Brasil)
 
+## Fork maintenance & releases
+
+This repository is a fork of [MHSanaei/3x-ui](https://github.com/MHSanaei/3x-ui). The notes below apply to maintaining **your fork** (`kolxz2/3x-ui`) and publishing binaries via GitHub Actions ([`release.yml`](/.github/workflows/release.yml)).
+
+### Sync your fork with upstream
+
+Check remotes:
+
+```bash
+git remote -v
+```
+
+If `upstream` is not listed yet, add the original repository:
+
+```bash
+git remote add upstream https://github.com/MHSanaei/3x-ui.git
+```
+
+Verify:
+
+```bash
+git remote -v
+```
+
+You should see something like:
+
+```text
+origin    https://github.com/kolxz2/3x-ui.git (fetch)
+origin    https://github.com/kolxz2/3x-ui.git (push)
+upstream  https://github.com/MHSanaei/3x-ui.git (fetch)
+upstream  https://github.com/MHSanaei/3x-ui.git (push)
+```
+
+Fetch the latest changes from upstream:
+
+```bash
+git fetch upstream
+```
+
+List remote branches:
+
+```bash
+git branch -r
+```
+
+**Option 1 — merge (simpler).** On your machine, in your `main` branch:
+
+```bash
+git checkout main
+git merge upstream/main
+git push origin main
+```
+
+Resolve merge conflicts if Git reports any, then commit and push again.
+
+**Option 2 — rebase (linear history).** Use only if you are comfortable with rebasing:
+
+```bash
+git checkout main
+git rebase upstream/main
+git push origin main
+```
+
+If you already pushed your old `main` to GitHub, a rebase may require `git push --force-with-lease origin main` — use that only when you intend to rewrite remote history.
+
+### Publish a GitHub Release (binaries)
+
+You **do not** need to create a release manually in the GitHub UI. The **Release 3X-UI** workflow builds Linux/Windows archives and attaches them to a release when you push a **version tag**.
+
+1. Update the version in [`config/version`](config/version) and commit your changes.
+2. Push to your fork:
+
+   ```bash
+   git push origin main
+   ```
+
+3. Create and push a tag with a **`v` prefix** (required by the workflow), for example `v3.2.6.2`:
+
+   ```bash
+   git tag v3.2.6.2
+   git push origin v3.2.6.2
+   ```
+
+   Tags like `3.2.6.2` **without** `v` will **not** trigger upload to [Releases](https://github.com/kolxz2/3x-ui/releases).
+
+4. Wait for the workflow on the [Actions](https://github.com/kolxz2/3x-ui/actions) tab (~10–15 minutes). When it finishes, open **Releases** — assets such as `x-ui-linux-amd64.tar.gz` and `x-ui-windows-amd64.zip` should appear under that tag.
+
+The workflow also runs on pushes to `main` when files under `.go`, `go.mod`, `frontend/`, `*.sh`, etc. change; in that case artifacts are stored under **Actions → Artifacts** only. **Release assets on the Releases page are uploaded only for tag pushes** (`refs/tags/v…`).
+
+To build without pushing a tag: **Actions → Release 3X-UI → Run workflow** (`workflow_dispatch`).
+
 ## Contributing
 
 Contributions are welcome. Please read the [Contributing Guide](/CONTRIBUTING.md) before opening an issue or pull request.
