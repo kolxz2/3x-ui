@@ -93,6 +93,7 @@ describe('parseVmessLink — XHTTP advanced fields', () => {
       scMaxBufferedPosts: 50,
       tls: 'tls',
     };
+    // legacy sessionKey must alias onto the renamed sessionIDKey (#6258)
     const link = `vmess://${Base64.encode(JSON.stringify(json))}`;
     const out = parseVmessLink(link);
     const xhttp = (out?.streamSettings as Record<string, unknown>).xhttpSettings as Record<string, unknown>;
@@ -101,7 +102,8 @@ describe('parseVmessLink — XHTTP advanced fields', () => {
     expect(xhttp.xPaddingHeader).toBe('X-Pad');
     expect(xhttp.xPaddingPlacement).toBe('header');
     expect(xhttp.xPaddingMethod).toBe('random');
-    expect(xhttp.sessionKey).toBe('X-Session');
+    expect(xhttp.sessionIDKey).toBe('X-Session');
+    expect(xhttp.sessionKey).toBeUndefined();
     expect(xhttp.seqKey).toBe('X-Seq');
     expect(xhttp.noSSEHeader).toBe(true);
     expect(xhttp.scMaxBufferedPosts).toBe(50);
@@ -135,7 +137,8 @@ describe('parseVlessLink — XHTTP advanced fields', () => {
       + '?type=xhttp&security=tls&host=edge.example&path=%2Fsp'
       + '&xPaddingObfsMode=true&xPaddingKey=secret-key&xPaddingHeader=X-Pad'
       + '&xPaddingPlacement=header&xPaddingMethod=random'
-      + '&sessionKey=X-Session&seqKey=X-Seq&noSSEHeader=true'
+      + '&sessionIDKey=X-Session&sessionIDTable=Base62&sessionIDLength=16-32'
+      + '&seqKey=X-Seq&noSSEHeader=true'
       + '&scMaxBufferedPosts=50'
       + '#imported-pad';
     const out = parseVlessLink(link);
@@ -145,7 +148,9 @@ describe('parseVlessLink — XHTTP advanced fields', () => {
     expect(xhttp.xPaddingHeader).toBe('X-Pad');
     expect(xhttp.xPaddingPlacement).toBe('header');
     expect(xhttp.xPaddingMethod).toBe('random');
-    expect(xhttp.sessionKey).toBe('X-Session');
+    expect(xhttp.sessionIDKey).toBe('X-Session');
+    expect(xhttp.sessionIDTable).toBe('Base62');
+    expect(xhttp.sessionIDLength).toBe('16-32');
     expect(xhttp.seqKey).toBe('X-Seq');
     expect(xhttp.noSSEHeader).toBe(true);
     expect(xhttp.scMaxBufferedPosts).toBe(50);
@@ -245,6 +250,17 @@ describe('parseShadowsocksLink', () => {
     expect(settings.servers[0].method).toBe('aes-256-gcm');
     expect(settings.servers[0].password).toBe('legacypw');
   });
+
+  it('decodes URL-safe base64 userinfo (as the emitter writes it)', () => {
+    const method = 'aes-256-gcm';
+    const password = '>>>';
+    const userinfo = Base64.encode(`${method}:${password}`, true);
+    expect(userinfo).toMatch(/[-_]/);
+    const out = parseShadowsocksLink(`ss://${userinfo}@1.2.3.4:8388#urlsafe`);
+    const settings = out?.settings as { servers: Array<{ method: string; password: string }> };
+    expect(settings.servers[0].method).toBe(method);
+    expect(settings.servers[0].password).toBe(password);
+  });
 });
 
 describe('parseHysteria2Link', () => {
@@ -286,6 +302,92 @@ describe('parseHysteria2Link', () => {
     const udp = finalmask.udp as Array<Record<string, unknown>>;
     expect(udp[0].type).toBe('salamander');
     expect((udp[0].settings as Record<string, unknown>).password).toBe('ftwfgb9655hh2mgo');
+  });
+
+  it('round-trips the salamander packetSize (Gecko) under fm', () => {
+    const fm = encodeURIComponent(JSON.stringify({
+      udp: [{ type: 'salamander', settings: { password: 'ftwfgb9655hh2mgo', packetSize: '100-200' } }],
+    }));
+    const link = `hysteria2://78e7795a209c4c099f896a816fc8448f@news.domain.org:8443?security=tls&sni=news.domain.org&fm=${fm}#hy2-gecko`;
+    const out = parseHysteria2Link(link);
+    expect(out).not.toBeNull();
+    const finalmask = (out!.streamSettings as Record<string, unknown>).finalmask as Record<string, unknown>;
+    const udp = finalmask.udp as Array<Record<string, unknown>>;
+    const settings = udp[0].settings as Record<string, unknown>;
+    expect(udp[0].type).toBe('salamander');
+    expect(settings.password).toBe('ftwfgb9655hh2mgo');
+    expect(settings.packetSize).toBe('100-200');
+  });
+
+  it('coerces string quicParams numerics under fm to integers — #5783', () => {
+    const fm = encodeURIComponent(JSON.stringify({
+      quicParams: {
+        keepAlivePeriod: '10s',
+        maxIdleTimeout: '30',
+        initStreamReceiveWindow: 524288,
+        maxIncomingStreams: true,
+        brutalUp: '100 mbps',
+      },
+    }));
+    const link = `hysteria2://78e7795a209c4c099f896a816fc8448f@news.domain.org:8443?security=tls&sni=news.domain.org&fm=${fm}#hy2-quic`;
+    const out = parseHysteria2Link(link);
+    expect(out).not.toBeNull();
+    const finalmask = (out!.streamSettings as Record<string, unknown>).finalmask as Record<string, unknown>;
+    const quic = finalmask.quicParams as Record<string, unknown>;
+    expect(quic.keepAlivePeriod).toBe(10);
+    expect(quic.maxIdleTimeout).toBe(30);
+    expect(quic.initStreamReceiveWindow).toBe(524288);
+    expect('maxIncomingStreams' in quic).toBe(false);
+    expect(quic.brutalUp).toBe('100 mbps');
+  });
+
+  it('clamps quicParams to the ranges xray accepts and drops junk — #5783', () => {
+    const fm = encodeURIComponent(JSON.stringify({
+      quicParams: {
+        keepAlivePeriod: '1s',
+        maxIdleTimeout: '10m',
+        maxIncomingStreams: 4,
+        initStreamReceiveWindow: 'inf',
+        maxStreamReceiveWindow: -5,
+        initConnectionReceiveWindow: 1e30,
+      },
+    }));
+    const link = `hysteria2://78e7795a209c4c099f896a816fc8448f@news.domain.org:8443?security=tls&sni=news.domain.org&fm=${fm}#hy2-clamp`;
+    const out = parseHysteria2Link(link);
+    expect(out).not.toBeNull();
+    const finalmask = (out!.streamSettings as Record<string, unknown>).finalmask as Record<string, unknown>;
+    const quic = finalmask.quicParams as Record<string, unknown>;
+    expect(quic.keepAlivePeriod).toBe(2);
+    expect(quic.maxIdleTimeout).toBe(120);
+    expect(quic.maxIncomingStreams).toBe(8);
+    expect('initStreamReceiveWindow' in quic).toBe(false);
+    expect('maxStreamReceiveWindow' in quic).toBe(false);
+    expect('initConnectionReceiveWindow' in quic).toBe(false);
+  });
+
+  it('round-trips the realm tlsConfig under fm', () => {
+    const fm = encodeURIComponent(JSON.stringify({
+      udp: [{
+        type: 'realm',
+        settings: {
+          url: 'realm://public@example.com/my-realm',
+          stunServers: ['stun.l.google.com:19302'],
+          tlsConfig: { serverName: 'example.com', alpn: ['h3'], fingerprint: 'chrome', allowInsecure: false },
+        },
+      }],
+    }));
+    const link = `hysteria2://auth@srv:443?security=tls&sni=srv&fm=${fm}#hy2-realm`;
+    const out = parseHysteria2Link(link);
+    expect(out).not.toBeNull();
+    const finalmask = (out!.streamSettings as Record<string, unknown>).finalmask as Record<string, unknown>;
+    const udp = finalmask.udp as Array<Record<string, unknown>>;
+    const settings = udp[0].settings as Record<string, unknown>;
+    expect(udp[0].type).toBe('realm');
+    expect(settings.url).toBe('realm://public@example.com/my-realm');
+    const tlsConfig = settings.tlsConfig as Record<string, unknown>;
+    expect(tlsConfig.serverName).toBe('example.com');
+    expect(tlsConfig.alpn).toEqual(['h3']);
+    expect(tlsConfig.fingerprint).toBe('chrome');
   });
 
   it('defaults alpn to h3 when the link omits it', () => {
@@ -352,6 +454,23 @@ describe('parseVlessLink — extra / fm / x_padding_bytes (B20)', () => {
     expect(xhttp.xPaddingBytes).toBe('900-9000');
   });
 
+  it('extracts the nested xmux object from the extra JSON blob', () => {
+    // The inbound link bundles xmux into `extra` as a nested object
+    // (sub/service.go). It must survive import so the outbound form's
+    // XMUX sub-form populates rather than silently dropping it (#5353).
+    const extra = encodeURIComponent(JSON.stringify({
+      xmux: { maxConcurrency: '8-16', hMaxRequestTimes: '700-1000' },
+    }));
+    const link = 'vless://u@h:1?type=xhttp&security=none&path=%2F&host=&mode=auto'
+      + '&extra=' + extra + '#t';
+    const parsed = parseVlessLink(link);
+    const xhttp = (parsed!.streamSettings as Record<string, unknown>).xhttpSettings as Record<string, unknown>;
+    const xmux = xhttp.xmux as Record<string, unknown>;
+    expect(xmux).toBeDefined();
+    expect(xmux.maxConcurrency).toBe('8-16');
+    expect(xmux.hMaxRequestTimes).toBe('700-1000');
+  });
+
   it('ignores malformed extra JSON without breaking the rest of the link', () => {
     const link = 'vless://u@h:1?type=xhttp&security=none&path=%2F&host=&mode=auto'
       + '&extra=not-json&fp=chrome#t';
@@ -359,6 +478,21 @@ describe('parseVlessLink — extra / fm / x_padding_bytes (B20)', () => {
     expect(parsed).not.toBeNull();
     const stream = parsed!.streamSettings as Record<string, unknown>;
     expect((stream.xhttpSettings as Record<string, unknown>).mode).toBe('auto');
+  });
+
+  it('round-trips ech and pcs from a TLS vless link', () => {
+    const ech = 'AFb+DQBSAAAgACAL7gYwrvaSFCIEs34G3SkfpuIbjMuYQxAiJsPK1oO7cwAkAAEAAQABAAIAAQADAAIAAQACAAIAAgADAAMAAQADAAIAAwADAAMxMjMAAA==';
+    const pcs = '6fbc15ba46dfed152ad6c8d2129dd774707dd667a9ab4965476fa0f79ba82670';
+    const link = 'vless://e3d307ae-c074-4aa3-af08-4f9e0f1d298b@localhost:15282?'
+      + 'alpn=h3&ech=' + encodeURIComponent(ech) + '&encryption=none&fp=firefox&host=&'
+      + 'mode=packet-up&path=%2F&pcs=' + pcs + '&security=tls&sni=123&type=xhttp#i5sboxj07w';
+    const parsed = parseVlessLink(link);
+    expect(parsed).not.toBeNull();
+    const tls = (parsed!.streamSettings as Record<string, unknown>).tlsSettings as Record<string, unknown>;
+    expect(tls.echConfigList).toBe(ech);
+    expect(tls.pinnedPeerCertSha256).toBe(pcs);
+    expect(tls.serverName).toBe('123');
+    expect(tls.fingerprint).toBe('firefox');
   });
 });
 

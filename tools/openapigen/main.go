@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	root := flag.String("root", ".", "repository root containing database/model and web/entity")
+	root := flag.String("root", ".", "repository root containing internal/database/model and internal/web/entity")
 	outDir := flag.String("out", "frontend/src/generated", "output directory relative to root")
 	flag.Parse()
 
@@ -22,7 +22,7 @@ func main() {
 func run(root, outDir string) error {
 	requests := []packageRequest{
 		{
-			Path: resolveRel(root, "database/model"),
+			Path: resolveRel(root, "internal/database/model"),
 			StructAllow: setOf(
 				"User",
 				"Inbound",
@@ -33,12 +33,12 @@ func run(root, outDir string) error {
 				"HistoryOfSeeders",
 				"Setting",
 				"Node",
-				"CustomGeoResource",
 				"ClientReverse",
 				"Client",
 				"ClientRecord",
 				"ClientInbound",
 				"InboundFallback",
+				"Host",
 			),
 			AliasAllow: setOf("Protocol"),
 			Overrides: map[string][]walkOverride{
@@ -53,21 +53,40 @@ func run(root, outDir string) error {
 				"InboundClientIps": {
 					{Field: "Ips", Kind: KindAny},
 				},
+				"Host": {
+					{Field: "MuxParams", Kind: KindAny},
+					{Field: "SockoptParams", Kind: KindAny},
+				},
 			},
 		},
 		{
-			Path: resolveRel(root, "web/entity"),
+			Path: resolveRel(root, "internal/web/entity"),
 			StructAllow: setOf(
 				"Msg",
 				"AllSetting",
 				"AllSettingView",
+				"HostGroup",
 			),
 		},
 		{
-			Path: resolveRel(root, "xray"),
+			Path: resolveRel(root, "internal/xray"),
 			StructAllow: setOf(
 				"ClientTraffic",
 			),
+		},
+		{
+			Path: resolveRel(root, "internal/web/service"),
+			StructAllow: setOf(
+				"InboundOption",
+				"NodeMutationRequest",
+				"NodeView",
+				"ProbeResultUI",
+				"RealityScanResult",
+			),
+		},
+		{
+			Path:        resolveRel(root, "internal/web/service/panel"),
+			StructAllow: setOf("ApiTokenView", "PanelUpdateStatus"),
 		},
 	}
 
@@ -94,11 +113,25 @@ func run(root, outDir string) error {
 	if err := emitTypes(typesBuf, schemas, aliases); err != nil {
 		return err
 	}
+	examplesBuf := &bytes.Buffer{}
+	if err := emitExamples(examplesBuf, schemas, aliases); err != nil {
+		return err
+	}
+	schemasBuf := &bytes.Buffer{}
+	if err := emitJSONSchema(schemasBuf, schemas, aliases); err != nil {
+		return err
+	}
 
 	if err := os.WriteFile(filepath.Join(target, "zod.ts"), zodBuf.Bytes(), 0o644); err != nil {
 		return err
 	}
 	if err := os.WriteFile(filepath.Join(target, "types.ts"), typesBuf.Bytes(), 0o644); err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(target, "examples.ts"), examplesBuf.Bytes(), 0o644); err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(target, "schemas.ts"), schemasBuf.Bytes(), 0o644); err != nil {
 		return err
 	}
 

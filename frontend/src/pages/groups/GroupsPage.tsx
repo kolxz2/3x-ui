@@ -22,11 +22,14 @@ import {
 } from 'antd';
 import type { MenuProps, TableColumnsType } from 'antd';
 import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   EditOutlined,
   LinkOutlined,
   MoreOutlined,
+  PieChartOutlined,
   PlusOutlined,
   RetweetOutlined,
   TagsOutlined,
@@ -41,7 +44,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useClients } from '@/hooks/useClients';
-import { HttpUtil } from '@/utils';
+import { HttpUtil, SizeFormatter } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import AppSidebar from '@/layouts/AppSidebar';
 import { LazyMount } from '@/components/utility';
@@ -90,7 +93,7 @@ export default function GroupsPage() {
   useEffect(() => { setMessageInstance(messageApi); }, [messageApi]);
   const queryClient = useQueryClient();
 
-  const { subSettings, bulkAdjust, bulkAddToGroup, bulkRemoveFromGroup, bulkDelete } = useClients();
+  const { subSettings, bulkAdjust, bulkAddToGroup, bulkRemoveFromGroup, bulkDelete } = useClients({ list: false });
 
   const groupsQuery = useQuery({
     queryKey: keys.clients.groups(),
@@ -123,9 +126,9 @@ export default function GroupsPage() {
     onSuccess: (msg) => { if (msg?.success) invalidate(); },
   });
 
-  const bulkResetMut = useMutation({
-    mutationFn: (body: { emails: string[] }) =>
-      HttpUtil.post('/panel/api/clients/bulkResetTraffic', body, JSON_HEADERS),
+  const groupResetMut = useMutation({
+    mutationFn: (body: { name: string }) =>
+      HttpUtil.post('/panel/api/clients/groups/resetTraffic', body, JSON_HEADERS),
     onSuccess: (msg) => { if (msg?.success) invalidate(); },
   });
 
@@ -161,8 +164,16 @@ export default function GroupsPage() {
     () => groups.reduce((acc, g) => acc + (g.clientCount || 0), 0),
     [groups],
   );
-  const emptyGroups = useMemo(
-    () => groups.filter((g) => (g.clientCount || 0) === 0).length,
+  const totalTraffic = useMemo(
+    () => groups.reduce((acc, g) => acc + (g.trafficUsed || 0), 0),
+    [groups],
+  );
+  const totalUpload = useMemo(
+    () => groups.reduce((acc, g) => acc + (g.up || 0), 0),
+    [groups],
+  );
+  const totalDownload = useMemo(
+    () => groups.reduce((acc, g) => acc + (g.down || 0), 0),
     [groups],
   );
 
@@ -310,17 +321,14 @@ export default function GroupsPage() {
     }
     modal.confirm({
       title: t('pages.groups.resetConfirmTitle', { name: g.name }),
-      content: t('pages.groups.resetConfirmContent', { count: g.clientCount }),
+      content: t('pages.groups.resetConfirmContent'),
       okText: t('reset'),
       okType: 'danger',
       cancelText: t('cancel'),
       onOk: async () => {
-        const emails = await fetchEmailsForGroup(g.name);
-        if (emails.length === 0) return;
-        const msg = await bulkResetMut.mutateAsync({ emails });
+        const msg = await groupResetMut.mutateAsync({ name: g.name });
         if (msg?.success) {
-          const affected = (msg.obj as { affected?: number } | undefined)?.affected ?? emails.length;
-          messageApi.success(t('pages.groups.resetSuccess', { count: affected }));
+          messageApi.success(t('pages.groups.resetSuccess', { name: g.name }));
         }
       },
     });
@@ -396,10 +404,10 @@ export default function GroupsPage() {
       render: (_v, row) => (
         <Space size={4}>
           <Dropdown trigger={['click']} menu={{ items: rowActions(row) }}>
-            <Button size="small" type="text" icon={<MoreOutlined />} />
+            <Button aria-label={t('more')} size="small" type="text" style={{ fontSize: 16 }} icon={<MoreOutlined />} />
           </Dropdown>
           <Tooltip title={t('pages.groups.rename')}>
-            <Button size="small" type="text" icon={<EditOutlined />} onClick={() => openRename(row)} />
+            <Button aria-label={t('pages.groups.rename')} size="small" type="text" style={{ fontSize: 16 }} icon={<EditOutlined />} onClick={() => openRename(row)} />
           </Tooltip>
         </Space>
       ),
@@ -416,6 +424,27 @@ export default function GroupsPage() {
       key: 'clientCount',
       width: 180,
       render: (count: number) => <span>{count || 0}</span>,
+    },
+    {
+      title: t('pages.groups.upload'),
+      dataIndex: 'up',
+      key: 'up',
+      width: 140,
+      render: (bytes: number) => <span>{SizeFormatter.sizeFormat(bytes || 0)}</span>,
+    },
+    {
+      title: t('pages.groups.download'),
+      dataIndex: 'down',
+      key: 'down',
+      width: 140,
+      render: (bytes: number) => <span>{SizeFormatter.sizeFormat(bytes || 0)}</span>,
+    },
+    {
+      title: t('pages.groups.trafficUsed'),
+      dataIndex: 'trafficUsed',
+      key: 'trafficUsed',
+      width: 160,
+      render: (bytes: number) => <span>{SizeFormatter.sizeFormat(bytes || 0)}</span>,
     },
   ];
 
@@ -449,24 +478,38 @@ export default function GroupsPage() {
                   <Col span={24}>
                     <Card size="small" hoverable className="summary-card">
                       <Row gutter={[16, isMobile ? 16 : 12]}>
-                        <Col xs={12} sm={8} md={6}>
+                        <Col xs={12} sm={12} md={6}>
                           <Statistic
                             title={t('pages.groups.totalGroups')}
                             value={String(totalGroups)}
                             prefix={<TagsOutlined />}
                           />
                         </Col>
-                        <Col xs={12} sm={8} md={6}>
+                        <Col xs={12} sm={12} md={6}>
                           <Statistic
                             title={t('pages.groups.totalGroupedClients')}
                             value={String(totalClients)}
                             prefix={<TeamOutlined />}
                           />
                         </Col>
-                        <Col xs={12} sm={8} md={6}>
+                        <Col xs={12} sm={12} md={6}>
                           <Statistic
-                            title={t('pages.groups.emptyGroups')}
-                            value={String(emptyGroups)}
+                            title={t('pages.groups.totalUpDown')}
+                            value={0}
+                            formatter={() => (
+                              <span>
+                                <ArrowUpOutlined /> {SizeFormatter.sizeFormat(totalUpload)}
+                                {' / '}
+                                <ArrowDownOutlined /> {SizeFormatter.sizeFormat(totalDownload)}
+                              </span>
+                            )}
+                          />
+                        </Col>
+                        <Col xs={12} sm={12} md={6}>
+                          <Statistic
+                            title={t('pages.groups.totalTraffic')}
+                            value={SizeFormatter.sizeFormat(totalTraffic)}
+                            prefix={<PieChartOutlined />}
                           />
                         </Col>
                       </Row>
@@ -479,7 +522,7 @@ export default function GroupsPage() {
                       hoverable
                       title={
                         <div className="card-toolbar">
-                          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+                          <Button aria-label={t('pages.groups.addGroup')} type="primary" icon={<PlusOutlined />} onClick={openCreate}>
                             {!isMobile && t('pages.groups.addGroup')}
                           </Button>
                         </div>

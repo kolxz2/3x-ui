@@ -1,0 +1,45 @@
+// Package job provides background job implementations for the 3x-ui web panel,
+// including traffic monitoring, system checks, and periodic maintenance tasks.
+package job
+
+import (
+<<<<<<< HEAD:web/job/check_xray_running_job.go
+	"github.com/kolxz2/3x-ui/v3/logger"
+	"github.com/kolxz2/3x-ui/v3/web/service"
+=======
+	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+>>>>>>> upstream/main:internal/web/job/check_xray_running_job.go
+)
+
+// EventBus is set from web layer to publish events.
+var EventBus *eventbus.Bus
+
+// CheckXrayRunningJob monitors Xray process health and restarts it if it crashes.
+type CheckXrayRunningJob struct {
+	xrayService service.XrayService
+	checkTime   int
+}
+
+// NewCheckXrayRunningJob creates a new Xray health check job instance.
+func NewCheckXrayRunningJob() *CheckXrayRunningJob {
+	return new(CheckXrayRunningJob)
+}
+
+// Run checks if Xray has crashed and restarts it after confirming it's down for 2 consecutive checks.
+func (j *CheckXrayRunningJob) Run() {
+	if !j.xrayService.DidXrayCrash() {
+		j.checkTime = 0
+	} else {
+		j.checkTime++
+		// only restart if it's down 2 times in a row
+		if j.checkTime > 1 {
+			err := j.xrayService.RestartXray(false)
+			j.checkTime = 0
+			if err != nil {
+				logger.Error("Restart xray failed:", err)
+			}
+		}
+	}
+}

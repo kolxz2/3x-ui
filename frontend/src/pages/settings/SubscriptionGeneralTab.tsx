@@ -1,7 +1,13 @@
-import { Collapse, Divider, Input, InputNumber, Switch } from 'antd';
+import { Alert, Button, Input, InputNumber, Switch, Tabs } from 'antd';
+import { BranchesOutlined, CompassOutlined, IdcardOutlined, InfoCircleOutlined, NodeIndexOutlined, SafetyCertificateOutlined, SettingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import type { AllSetting } from '@/models/setting';
-import { SettingListItem } from '@/components/ui';
+import { onNumber } from '@/utils/onNumber';
+import { DefaultSettingTag, SettingListItem } from '@/components/ui';
+import { RemarkTemplateField } from '@/components/form';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { catTabLabel } from './catTabLabel';
 import { sanitizePath, normalizePath } from './uriPath';
 
 interface SubscriptionGeneralTabProps {
@@ -11,12 +17,14 @@ interface SubscriptionGeneralTabProps {
 
 export default function SubscriptionGeneralTab({ allSetting, updateSetting }: SubscriptionGeneralTabProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isMobile } = useMediaQuery();
 
   return (
-    <Collapse defaultActiveKey="1" items={[
+    <Tabs defaultActiveKey="1" items={[
       {
         key: '1',
-        label: t('pages.settings.panelSettings'),
+        label: catTabLabel(<SettingOutlined />, t('pages.settings.panelSettings'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.subEnable')} description={t('pages.settings.subEnableDesc')}>
@@ -28,15 +36,29 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
             <SettingListItem paddings="small" title={t('pages.settings.subClashEnableTitle')}>
               <Switch checked={allSetting.subClashEnable} onChange={(v) => updateSetting({ subClashEnable: v })} />
             </SettingListItem>
+            {(allSetting.subJsonEnable || allSetting.subClashEnable) && (
+              <Alert
+                type="info"
+                showIcon
+                style={{ margin: '12px 20px' }}
+                title={t('pages.settings.subFormatsTipTitle')}
+                description={t('pages.settings.subFormatsTipDesc')}
+                action={(
+                  <Button size="small" onClick={() => navigate('/settings#subscription-formats')}>
+                    {t('pages.settings.subFormatsTipAction')}
+                  </Button>
+                )}
+              />
+            )}
             <SettingListItem paddings="small" title={t('pages.settings.subListen')} description={t('pages.settings.subListenDesc')}>
               <Input value={allSetting.subListen} onChange={(e) => updateSetting({ subListen: e.target.value })} />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.subDomain')} description={t('pages.settings.subDomainDesc')}>
               <Input value={allSetting.subDomain} onChange={(e) => updateSetting({ subDomain: e.target.value })} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subPort')} description={t('pages.settings.subPortDesc')}>
+            <SettingListItem paddings="small" title={t('pages.settings.subPort')} badge={<DefaultSettingTag settingKey="subPort" value={allSetting.subPort} />} description={t('pages.settings.subPortDesc')}>
               <InputNumber value={allSetting.subPort} min={1} max={65535} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ subPort: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ subPort: v }))} />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.subPath')} description={t('pages.settings.subPathDesc')}>
               <Input
@@ -55,21 +77,46 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
       },
       {
         key: '2',
-        label: t('pages.settings.information'),
+        label: catTabLabel(<InfoCircleOutlined />, t('pages.settings.information'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.subEncrypt')} description={t('pages.settings.subEncryptDesc')}>
               <Switch checked={allSetting.subEncrypt} onChange={(v) => updateSetting({ subEncrypt: v })} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subShowInfo')} description={t('pages.settings.subShowInfoDesc')}>
-              <Switch checked={allSetting.subShowInfo} onChange={(v) => updateSetting({ subShowInfo: v })} />
+            <SettingListItem
+              paddings="small"
+              title={t('pages.settings.remarkTemplate')}
+              description={t('pages.settings.remarkTemplateDesc')}
+            >
+              <RemarkTemplateField
+                value={allSetting.remarkTemplate}
+                onChange={(v) => updateSetting({ remarkTemplate: v })}
+                maxLength={256}
+              />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subEmailInRemark')} description={t('pages.settings.subEmailInRemarkDesc')}>
-              <Switch checked={allSetting.subEmailInRemark} onChange={(v) => updateSetting({ subEmailInRemark: v })} />
+            <SettingListItem
+              paddings="small"
+              title={t('pages.settings.subShowIdentityOnAllLinks')}
+              description={t('pages.settings.subShowIdentityOnAllLinksDesc')}
+            >
+              <Switch
+                checked={allSetting.subShowIdentityOnAllLinks}
+                onChange={(v) => updateSetting({ subShowIdentityOnAllLinks: v })}
+              />
             </SettingListItem>
 
-            <Divider>{t('pages.settings.subTitle')}</Divider>
-
+            <SettingListItem paddings="small" title={t('pages.settings.subUpdates')} badge={<DefaultSettingTag settingKey="subUpdates" value={allSetting.subUpdates} />} description={t('pages.settings.subUpdatesDesc')}>
+              <InputNumber value={allSetting.subUpdates} min={0} max={525600} style={{ width: '100%' }}
+                onChange={onNumber((v) => updateSetting({ subUpdates: v }))} />
+            </SettingListItem>
+          </>
+        ),
+      },
+      {
+        key: '3',
+        label: catTabLabel(<IdcardOutlined />, t('pages.settings.profile'), isMobile),
+        children: (
+          <>
             <SettingListItem paddings="small" title={t('pages.settings.subTitle')} description={t('pages.settings.subTitleDesc')}>
               <Input value={allSetting.subTitle} onChange={(e) => updateSetting({ subTitle: e.target.value })} />
             </SettingListItem>
@@ -85,22 +132,31 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
               <Input.TextArea value={allSetting.subAnnounce}
                 onChange={(e) => updateSetting({ subAnnounce: e.target.value })} />
             </SettingListItem>
-
-            <Divider>Happ</Divider>
-
-            <SettingListItem paddings="small" title={t('pages.settings.subEnableRouting')} description={t('pages.settings.subEnableRoutingDesc')}>
-              <Switch checked={allSetting.subEnableRouting} onChange={(v) => updateSetting({ subEnableRouting: v })} />
-            </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.subRoutingRules')} description={t('pages.settings.subRoutingRulesDesc')}>
-              <Input.TextArea value={allSetting.subRoutingRules} placeholder="happ://routing/add/..."
-                onChange={(e) => updateSetting({ subRoutingRules: e.target.value })} />
+            <SettingListItem
+              paddings="small"
+              title={t('pages.settings.subThemeDir')}
+              description={(
+                <>
+                  {t('pages.settings.subThemeDirDesc')}{' '}
+                  <a
+                    href="https://github.com/MHSanaei/3x-ui/blob/main/docs/custom-subscription-templates.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t('pages.settings.subThemeDirDocs')}
+                  </a>
+                </>
+              )}
+            >
+              <Input value={allSetting.subThemeDir} placeholder="/etc/3x-ui/sub_templates/my-theme/"
+                onChange={(e) => updateSetting({ subThemeDir: e.target.value })} />
             </SettingListItem>
           </>
         ),
       },
       {
-        key: '3',
-        label: t('pages.settings.certs'),
+        key: '4',
+        label: catTabLabel(<SafetyCertificateOutlined />, t('pages.settings.certs'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.subCertPath')} description={t('pages.settings.subCertPathDesc')}>
@@ -113,13 +169,53 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
         ),
       },
       {
-        key: '4',
-        label: t('pages.settings.intervals'),
+        key: '5',
+        label: catTabLabel(<BranchesOutlined />, 'Happ', isMobile),
         children: (
           <>
-            <SettingListItem paddings="small" title={t('pages.settings.subUpdates')} description={t('pages.settings.subUpdatesDesc')}>
-              <InputNumber value={allSetting.subUpdates} min={1} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ subUpdates: Number(v) || 0 })} />
+            <SettingListItem paddings="small" title={t('pages.settings.subEnableRouting')} description={t('pages.settings.subEnableRoutingDesc')}>
+              <Switch checked={allSetting.subEnableRouting} onChange={(v) => updateSetting({ subEnableRouting: v })} />
+            </SettingListItem>
+            <SettingListItem paddings="small" title={t('pages.settings.subRoutingRules')} description={t('pages.settings.subRoutingRulesDesc')}>
+              <Input.TextArea value={allSetting.subRoutingRules} placeholder="happ://routing/add/..."
+                onChange={(e) => updateSetting({ subRoutingRules: e.target.value })} />
+            </SettingListItem>
+            <SettingListItem paddings="small" title={t('pages.settings.subHideSettings')} description={t('pages.settings.subHideSettingsDesc')}>
+              <Switch checked={allSetting.subHideSettings} onChange={(v) => updateSetting({ subHideSettings: v })} />
+            </SettingListItem>
+          </>
+        ),
+      },
+      {
+        key: '6',
+        label: catTabLabel(<NodeIndexOutlined />, 'Clash / Mihomo', isMobile),
+        children: (
+          <>
+            <SettingListItem paddings="small" title={t('pages.settings.subClashEnableRouting')} description={t('pages.settings.subClashEnableRoutingDesc')}>
+              <Switch checked={allSetting.subClashEnableRouting} onChange={(v) => updateSetting({ subClashEnableRouting: v })} />
+            </SettingListItem>
+            <SettingListItem paddings="small" title={t('pages.settings.subClashRoutingRules')} description={t('pages.settings.subClashRoutingRulesDesc')}>
+              <Input.TextArea
+                value={allSetting.subClashRules}
+                rows={8}
+                placeholder={'GEOSITE,category-ir,DIRECT\nGEOIP,private,DIRECT'}
+                onChange={(e) => updateSetting({ subClashRules: e.target.value })}
+              />
+            </SettingListItem>
+          </>
+        ),
+      },
+      {
+        key: '7',
+        label: catTabLabel(<CompassOutlined />, 'Incy', isMobile),
+        children: (
+          <>
+            <SettingListItem paddings="small" title={t('pages.settings.subIncyEnableRouting')} description={t('pages.settings.subIncyEnableRoutingDesc')}>
+              <Switch checked={allSetting.subIncyEnableRouting} onChange={(v) => updateSetting({ subIncyEnableRouting: v })} />
+            </SettingListItem>
+            <SettingListItem paddings="small" title={t('pages.settings.subIncyRoutingRules')} description={t('pages.settings.subIncyRoutingRulesDesc')}>
+              <Input.TextArea value={allSetting.subIncyRoutingRules} placeholder="incy://routing/onadd/..."
+                onChange={(e) => updateSetting({ subIncyRoutingRules: e.target.value })} />
             </SettingListItem>
           </>
         ),

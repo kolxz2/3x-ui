@@ -4,6 +4,7 @@ import { Alert, Input, Modal, Select, Space, Spin, Table, Tag, Typography, messa
 import type { ColumnsType } from 'antd/es/table';
 
 import { HttpUtil } from '@/utils';
+import { formatInboundLabel } from '@/lib/inbounds/label';
 import type { DBInbound } from '@/models/dbinbound';
 
 interface AttachExistingClientsModalProps {
@@ -170,7 +171,7 @@ export default function AttachExistingClientsModal({
       okButtonProps={{ disabled: selectedEmails.length === 0, loading: saving }}
       okText={t('pages.inbounds.attachClients')}
       cancelText={t('cancel')}
-      title={t('pages.inbounds.attachExistingTitle', { remark: target?.tag ?? '' })}
+      title={t('pages.inbounds.attachExistingTitle', { remark: formatInboundLabel(target?.tag, target?.remark) })}
       width={680}
     >
       {messageContextHolder}
@@ -179,14 +180,15 @@ export default function AttachExistingClientsModal({
       </Typography.Paragraph>
 
       {noClients ? (
-        <Alert type="info" showIcon message={t('pages.inbounds.attachExistingNoClients')} />
+        <Alert type="info" showIcon title={t('pages.inbounds.attachExistingNoClients')} />
       ) : (
         <Spin spinning={loading}>
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Space orientation="vertical" size="small" style={{ width: '100%' }}>
             <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
               <Space wrap>
                 <Input.Search
                   allowClear
+                  aria-label={t('search')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('pages.inbounds.attachClientsSearchPlaceholder')}
@@ -195,12 +197,13 @@ export default function AttachExistingClientsModal({
                 {groupOptions.length > 0 && (
                   <Select
                     allowClear
+                    aria-label={t('pages.clients.group')}
                     value={groupFilter}
                     onChange={(v) => setGroupFilter(v)}
                     options={groupOptions}
                     placeholder={t('pages.clients.group')}
                     style={{ minWidth: 160 }}
-                    optionFilterProp="label"
+                    showSearch={{ optionFilterProp: 'label' }}
                   />
                 )}
               </Space>

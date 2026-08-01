@@ -18,6 +18,8 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 
 import type { InboundOption } from '@/hooks/useClients';
+import type { NodeRecord } from '@/schemas/node';
+import { formatInboundLabel } from '@/lib/inbounds/label';
 import { emptyFilters, type ClientFilters } from './filters';
 
 interface FilterDrawerProps {
@@ -28,6 +30,7 @@ interface FilterDrawerProps {
   inbounds: InboundOption[];
   protocols: string[];
   groups: string[];
+  nodes: NodeRecord[];
 }
 
 const BUCKET_KEYS = ['active', 'expiring', 'depleted', 'deactive', 'online'] as const;
@@ -40,6 +43,7 @@ export default function FilterDrawer({
   inbounds,
   protocols,
   groups,
+  nodes,
 }: FilterDrawerProps) {
   const { t } = useTranslation();
 
@@ -50,7 +54,7 @@ export default function FilterDrawer({
   const inboundOptions = useMemo(
     () => inbounds.map((ib) => ({
       value: ib.id,
-      label: ib.tag ?? '',
+      label: formatInboundLabel(ib.tag, ib.remark),
     })),
     [inbounds],
   );
@@ -65,6 +69,16 @@ export default function FilterDrawer({
     [groups],
   );
 
+  // 0 is the "local panel" sentinel (inbounds without a nodeId) — see
+  // ClientFilters.nodeIds (#4997).
+  const nodeOptions = useMemo(
+    () => [
+      { value: 0, label: t('pages.clients.filters.localPanel') },
+      ...nodes.map((n) => ({ value: n.id, label: n.name || `#${n.id}` })),
+    ],
+    [nodes, t],
+  );
+
   const dateRange: [Dayjs | null, Dayjs | null] = [
     filters.expiryFrom ? dayjs(filters.expiryFrom) : null,
     filters.expiryTo ? dayjs(filters.expiryTo) : null,
@@ -75,7 +89,7 @@ export default function FilterDrawer({
       title={t('pages.clients.filterTitle')}
       open={open}
       onClose={() => onOpenChange(false)}
-      width={420}
+      size={420}
       destroyOnHidden
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -94,7 +108,7 @@ export default function FilterDrawer({
             value={filters.buckets}
             onChange={(v) => patch('buckets', v as string[])}
           >
-            <Space direction="vertical">
+            <Space orientation="vertical">
               {BUCKET_KEYS.map((k) => (
                 <Checkbox key={k} value={k}>
                   {bucketLabel(k, t)}
@@ -125,11 +139,26 @@ export default function FilterDrawer({
             placeholder={t('inbounds')}
             maxTagCount="responsive"
             allowClear
-            showSearch
-            optionFilterProp="label"
+            showSearch={{ optionFilterProp: 'label' }}
             listHeight={220}
           />
         </Form.Item>
+
+        {nodes.length > 0 && (
+          <Form.Item label={t('pages.clients.filters.nodes')}>
+            <Select
+              mode="multiple"
+              value={filters.nodeIds}
+              onChange={(v) => patch('nodeIds', v as number[])}
+              options={nodeOptions}
+              placeholder={t('pages.clients.filters.nodes')}
+              maxTagCount="responsive"
+              allowClear
+              showSearch={{ optionFilterProp: 'label' }}
+              listHeight={220}
+            />
+          </Form.Item>
+        )}
 
         <Form.Item label={t('pages.clients.group')}>
           <Select
@@ -140,8 +169,7 @@ export default function FilterDrawer({
             placeholder={t('pages.clients.groupPlaceholder')}
             maxTagCount="responsive"
             allowClear
-            showSearch
-            optionFilterProp="label"
+            showSearch={{ optionFilterProp: 'label' }}
             listHeight={220}
           />
         </Form.Item>

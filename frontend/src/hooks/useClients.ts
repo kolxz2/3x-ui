@@ -14,6 +14,7 @@ import {
   BulkAttachResultSchema,
   BulkCreateResultSchema,
   BulkDeleteResultSchema,
+  BulkSetEnableResultSchema,
   BulkDetachResultSchema,
   DelDepletedResultSchema,
   type ClientHydrate,
@@ -22,15 +23,21 @@ import {
   type ClientsSummary,
   type ClientPageResponse,
   type InboundOption,
+  type ExternalLink,
   type BulkAdjustResult,
   type BulkAttachResult,
   type BulkCreateResult,
   type BulkDeleteResult,
+  type BulkSetEnableResult,
   type BulkDetachResult,
 } from '@/schemas/client';
 import { DefaultsPayloadSchema } from '@/schemas/defaults';
+import { TRAFFIC_POLL_INTERVAL_S } from '@/lib/traffic/poll-interval';
 
-export type { ClientRecord, ClientTraffic, ClientsSummary, InboundOption };
+// One row sent to POST /clients/:email/externalLinks.
+export type ExternalLinkInput = { kind: 'link' | 'subscription'; value: string; remark: string };
+
+export type { ClientRecord, ClientTraffic, ClientsSummary, InboundOption, ExternalLink };
 
 const JSON_HEADERS = { headers: { 'Content-Type': 'application/json' } } as const;
 
@@ -41,6 +48,7 @@ interface SubSettings {
   subJsonEnable: boolean;
   subClashURI: string;
   subClashEnable: boolean;
+  publicHost: string;
 }
 
 export interface ClientQueryParams {
@@ -65,8 +73,15 @@ export interface ClientQueryParams {
 
 const DEFAULT_QUERY: ClientQueryParams = { page: 1, pageSize: 25 };
 const DEFAULT_SUMMARY: ClientsSummary = {
-  total: 0, active: 0, online: [], depleted: [], expiring: [], deactive: [],
+  total: 0, active: 0,
+  onlineCount: 0, depletedCount: 0, expiringCount: 0, deactiveCount: 0,
+  online: [], depleted: [], expiring: [], deactive: [],
 };
+
+export interface ClientSpeedEntry {
+  up: number;
+  down: number;
+}
 
 type ClientStatRow = ClientTraffic & { email?: string };
 
@@ -101,7 +116,63 @@ export function computeClientsSummary(
     if (nearExpiry || nearLimit) expiring.push(email);
     else active += 1;
   }
-  return { total: stats.length, active, online, depleted, expiring, deactive };
+  return {
+    total: stats.length,
+    active,
+    onlineCount: online.length,
+    depletedCount: depleted.length,
+    expiringCount: expiring.length,
+    deactiveCount: deactive.length,
+    online,
+    depleted,
+    expiring,
+    deactive,
+  };
+}
+
+export function sameSpeedMap(
+  a: Record<string, ClientSpeedEntry>,
+  b: Record<string, ClientSpeedEntry>,
+): boolean {
+  const aKeys = Object.keys(a);
+  if (aKeys.length !== Object.keys(b).length) return false;
+  for (const key of aKeys) {
+    const left = a[key];
+    const right = b[key];
+    if (!right || left.up !== right.up || left.down !== right.down) return false;
+  }
+  return true;
+}
+
+// The field list computeClientsSummary reads, and deliberately nothing else.
+// lastOnline in particular churns for every online client on every push and no
+// counter depends on it, so including it here would defeat the comparison.
+export function sameSummaryInputs(a: ClientStatRow[], b: ClientStatRow[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const left = a[i];
+    const right = b[i];
+    if (left.email !== right.email
+      || left.up !== right.up
+      || left.down !== right.down
+      || left.total !== right.total
+      || left.enable !== right.enable
+      || left.expiryTime !== right.expiryTime) return false;
+  }
+  return true;
+}
+
+export function pickClientsSummary(
+  serverSummary: ClientsSummary,
+  allClientStats: ClientStatRow[],
+  onlineSet: Set<string>,
+  expireDiffMs: number,
+  trafficDiffBytes: number,
+): ClientsSummary {
+  if (allClientStats.length === 0) return serverSummary;
+  if (serverSummary.total > allClientStats.length) return serverSummary;
+  const live = computeClientsSummary(allClientStats, onlineSet, expireDiffMs, trafficDiffBytes);
+  return { ...live, total: serverSummary.total || live.total };
 }
 
 function buildQS(p: ClientQueryParams): string {
@@ -129,7 +200,7 @@ async function fetchClientPage(params: ClientQueryParams): Promise<ClientPageRes
   const qs = buildQS(params);
   const msg = await HttpUtil.get(`/panel/api/clients/list/paged?${qs}`, undefined, { silent: true });
   if (!msg?.success || !msg.obj) throw new Error(msg?.msg || 'Failed to fetch clients');
-  const validated = parseMsg(msg, ClientPageResponseSchema, 'clients/list/paged');
+  const validated = parseMsg(msg, ClientPageResponseSchema, 'clients/list/paged', { strict: true });
   if (!validated.obj) throw new Error('Empty clients response');
   return validated.obj;
 }
@@ -142,23 +213,37 @@ async function fetchInboundOptions(): Promise<InboundOption[]> {
 }
 
 async function fetchDefaults(): Promise<Record<string, unknown>> {
-  const msg = await HttpUtil.post('/panel/setting/defaultSettings', undefined, { silent: true });
+  const msg = await HttpUtil.post('/panel/api/setting/defaultSettings', undefined, { silent: true });
   if (!msg?.success) throw new Error(msg?.msg || 'Failed to fetch defaults');
   const validated = parseMsg(msg, DefaultsPayloadSchema, 'setting/defaultSettings');
   return validated.obj || {};
 }
 
-export function useClients() {
+export interface UseClientsOptions {
+  // Callers that only need the mutations — the bulk modals, the groups page —
+  // pass false. Mounting them used to start a second 5-second poll of the paged
+  // list whose result they never read, which on a large panel means a full
+  // summary aggregate every 5 seconds for nothing.
+  list?: boolean;
+}
+
+export function useClients(options: UseClientsOptions = {}) {
+  const withList = options.list ?? true;
   const queryClient = useQueryClient();
 
-  const [query, setQueryState] = useState<ClientQueryParams>(DEFAULT_QUERY);
+  // Null until the page has settled on a query. The clients page cannot build
+  // one until the persisted sort and the panel's configured page size are both
+  // known, and fetching before then cost three sequential requests per load —
+  // the first two thrown away (#trace).
+  const [query, setQueryState] = useState<ClientQueryParams | null>(null);
   // setQuery shallow-compares so callers can pass a fresh object every render
   // (the common React pattern) without triggering a re-fetch when nothing
   // actually changed.
   const setQuery = useCallback((next: ClientQueryParams) => {
     setQueryState((prev) => {
       if (
-        prev.page === next.page
+        prev
+        && prev.page === next.page
         && prev.pageSize === next.pageSize
         && (prev.search ?? '') === (next.search ?? '')
         && (prev.filter ?? '') === (next.filter ?? '')
@@ -180,15 +265,20 @@ export function useClients() {
   }, []);
 
   const listQuery = useQuery({
-    queryKey: keys.clients.list(query),
-    queryFn: () => fetchClientPage(query),
+    queryKey: keys.clients.list(query ?? DEFAULT_QUERY),
+    queryFn: () => fetchClientPage(query ?? DEFAULT_QUERY),
+    enabled: withList && query !== null,
     staleTime: Infinity,
+    // List is sorted/paged server-side, so the WS patch can't add new or
+    // re-sort rows; poll the current page to keep it live (pauses when hidden).
+    refetchInterval: 5000,
     placeholderData: keepPreviousData,
   });
 
   const inboundOptionsQuery = useQuery({
     queryKey: keys.inbounds.options(),
     queryFn: fetchInboundOptions,
+    enabled: withList,
     staleTime: Infinity,
   });
 
@@ -206,6 +296,7 @@ export function useClients() {
       const validated = parseMsg(msg, OnlinesSchema, 'clients/onlines');
       return Array.isArray(validated.obj) ? validated.obj : [];
     },
+    enabled: withList,
     staleTime: Infinity,
   });
 
@@ -215,7 +306,14 @@ export function useClients() {
   const allGroups = listQuery.data?.groups ?? [];
   const fetched = listQuery.data !== undefined || listQuery.isError;
   const fetchError = listQuery.error ? (listQuery.error as Error).message : '';
-  const loading = listQuery.isFetching;
+  // isFetching is deliberately NOT read here. Touching it makes it a tracked
+  // property, so the 5s refetchInterval notifies twice per cycle — two whole
+  // page renders even when structural sharing leaves the data identical, and
+  // each one bumps rc-table's immutable mark and re-runs every cell renderer.
+  // Callers that want a spinner for an explicit refresh drive it locally.
+  // Showing kept-previous data for a new key (filter/sort/page) — drives the
+  // table overlay so the 5s background poll doesn't flash it.
+  const transitioning = listQuery.isPlaceholderData;
 
   const inbounds = inboundOptionsQuery.data ?? [];
   const onlines = useMemo(() => onlinesQuery.data ?? [], [onlinesQuery.data]);
@@ -228,6 +326,7 @@ export function useClients() {
     subJsonEnable: !!defaults.subJsonEnable,
     subClashURI: (defaults.subClashURI as string) || '',
     subClashEnable: !!defaults.subClashEnable,
+    publicHost: (defaults.subDomain as string) || (defaults.webDomain as string) || '',
   }), [
     defaults.subEnable,
     defaults.subURI,
@@ -235,6 +334,8 @@ export function useClients() {
     defaults.subJsonEnable,
     defaults.subClashURI,
     defaults.subClashEnable,
+    defaults.subDomain,
+    defaults.webDomain,
   ]);
 
   const ipLimitEnable = !!defaults.ipLimitEnable;
@@ -242,25 +343,19 @@ export function useClients() {
   const expireDiff = ((defaults.expireDiff as number) ?? 0) * 86400000;
   const trafficDiff = ((defaults.trafficDiff as number) ?? 0) * 1073741824;
   const pageSize = (defaults.pageSize as number) ?? 0;
+  // pageSize 0 means "one long page", which is indistinguishable from "the
+  // settings have not arrived yet" — so callers need this flag to know when the
+  // configured page size is real. isFetched (not isSuccess) so a failed
+  // settings request still lets the page fall back and render.
+  const settingsReady = defaultsQuery.isFetched;
 
-  // Live summary: the client_stats WS event refreshes allClientStats every few
-  // seconds, so the top counters track reality without a page refresh. Falls
-  // back to the server-computed summary until the first event lands, and keeps
-  // the server's authoritative total for the headline count.
   const [allClientStats, setAllClientStats] = useState<ClientStatRow[]>([]);
-  const summary = useMemo<ClientsSummary>(() => {
-    const serverSummary = listQuery.data?.summary ?? DEFAULT_SUMMARY;
-    if (allClientStats.length === 0) return serverSummary;
-    const live = computeClientsSummary(allClientStats, new Set(onlines), expireDiff, trafficDiff);
-    return { ...live, total: serverSummary.total || live.total };
-  }, [allClientStats, onlines, expireDiff, trafficDiff, listQuery.data?.summary]);
+  const [clientSpeed, setClientSpeed] = useState<Record<string, ClientSpeedEntry>>({});
+  const summary = useMemo<ClientsSummary>(
+    () => pickClientsSummary(listQuery.data?.summary ?? DEFAULT_SUMMARY, allClientStats, new Set(onlines), expireDiff, trafficDiff),
+    [allClientStats, onlines, expireDiff, trafficDiff, listQuery.data?.summary],
+  );
 
-  // Client mutations (add/update/remove/attach/detach/resetTraffic/…) all
-  // mutate inbound rows server-side too — adding a client appends to
-  // settings.clients on each attached inbound, the slim list's per-inbound
-  // client count is derived from that. Invalidate both buckets so the
-  // Inbounds page and any open edit modal pick up the new shape without
-  // a manual reload.
   const invalidateAll = useCallback(
     () => {
       markLocalInvalidate();
@@ -268,6 +363,7 @@ export function useClients() {
       return Promise.all([
         queryClient.invalidateQueries({ queryKey: keys.clients.root() }),
         queryClient.invalidateQueries({ queryKey: keys.inbounds.root() }),
+        queryClient.invalidateQueries({ queryKey: keys.xray.config() }),
       ]);
     },
     [queryClient],
@@ -336,16 +432,31 @@ export function useClients() {
   });
 
   const bulkAdjustMut = useMutation({
-    mutationFn: async (payload: { emails: string[]; addDays: number; addBytes: number }): Promise<Msg<BulkAdjustResult>> => {
+    mutationFn: async (payload: { emails: string[]; addDays: number; addBytes: number; flow: string }): Promise<Msg<BulkAdjustResult>> => {
       const raw = await HttpUtil.post('/panel/api/clients/bulkAdjust', payload, JSON_HEADERS);
       return parseMsg(raw, BulkAdjustResultSchema, 'clients/bulkAdjust');
     },
     onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
   });
 
+  const bulkSetEnableMut = useMutation({
+    mutationFn: async (payload: { emails: string[]; enable: boolean }): Promise<Msg<BulkSetEnableResult>> => {
+      const path = payload.enable ? '/panel/api/clients/bulkEnable' : '/panel/api/clients/bulkDisable';
+      const raw = await HttpUtil.post(path, { emails: payload.emails }, JSON_HEADERS);
+      return parseMsg(raw, BulkSetEnableResultSchema, payload.enable ? 'clients/bulkEnable' : 'clients/bulkDisable');
+    },
+    onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
+  });
+
   const attachMut = useMutation({
     mutationFn: ({ email, inboundIds }: { email: string; inboundIds: number[] }) =>
-      HttpUtil.post(`/panel/api/clients/${encodeURIComponent(email)}/attach`, { inboundIds }, JSON_HEADERS),
+      HttpUtil.post(`/panel/api/clients/${encodeURIComponent(email)}/attach`, { inboundIds }, { ...JSON_HEADERS, silentSuccess: true }),
+    onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
+  });
+
+  const setExternalLinksMut = useMutation({
+    mutationFn: ({ email, externalLinks }: { email: string; externalLinks: ExternalLinkInput[] }) =>
+      HttpUtil.post(`/panel/api/clients/${encodeURIComponent(email)}/externalLinks`, { externalLinks }, { ...JSON_HEADERS, silentSuccess: true }),
     onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
   });
 
@@ -359,9 +470,10 @@ export function useClients() {
 
   const detachMut = useMutation({
     mutationFn: ({ email, inboundIds }: { email: string; inboundIds: number[] }) =>
-      HttpUtil.post(`/panel/api/clients/${encodeURIComponent(email)}/detach`, { inboundIds }, JSON_HEADERS),
+      HttpUtil.post(`/panel/api/clients/${encodeURIComponent(email)}/detach`, { inboundIds }, { ...JSON_HEADERS, silentSuccess: true }),
     onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
   });
+
 
   const bulkDetachMut = useMutation({
     mutationFn: async (payload: { emails: string[]; inboundIds: number[] }): Promise<Msg<BulkDetachResult>> => {
@@ -390,6 +502,22 @@ export function useClients() {
     onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
   });
 
+  const delOrphansMut = useMutation({
+    mutationFn: async () => {
+      const raw = await HttpUtil.post('/panel/api/clients/delOrphans');
+      return parseMsg(raw, DelDepletedResultSchema, 'clients/delOrphans');
+    },
+    onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
+  });
+
+  const importClientsMut = useMutation({
+    mutationFn: async (data: string): Promise<Msg<BulkCreateResult>> => {
+      const raw = await HttpUtil.post('/panel/api/clients/import', { data }, JSON_HEADERS);
+      return parseMsg(raw, BulkCreateResultSchema, 'clients/import');
+    },
+    onSuccess: (msg) => { if (msg?.success) invalidateAll(); },
+  });
+
   const create = useCallback((payload: unknown) => createMut.mutateAsync(payload), [createMut]);
   const update = useCallback((email: string, client: unknown) => {
     if (!email) return Promise.resolve(null as unknown as Msg<unknown>);
@@ -407,10 +535,18 @@ export function useClients() {
     if (!Array.isArray(payloads) || payloads.length === 0) return Promise.resolve(null as unknown as Msg<BulkCreateResult>);
     return bulkCreateMut.mutateAsync(payloads);
   }, [bulkCreateMut]);
-  const bulkAdjust = useCallback((emails: string[], addDays: number, addBytes: number) => {
+  const bulkAdjust = useCallback((emails: string[], addDays: number, addBytes: number, flow = '') => {
     if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null);
-    return bulkAdjustMut.mutateAsync({ emails, addDays, addBytes });
+    return bulkAdjustMut.mutateAsync({ emails, addDays, addBytes, flow });
   }, [bulkAdjustMut]);
+  const bulkEnable = useCallback((emails: string[]) => {
+    if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null as unknown as Msg<BulkSetEnableResult>);
+    return bulkSetEnableMut.mutateAsync({ emails, enable: true });
+  }, [bulkSetEnableMut]);
+  const bulkDisable = useCallback((emails: string[]) => {
+    if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null as unknown as Msg<BulkSetEnableResult>);
+    return bulkSetEnableMut.mutateAsync({ emails, enable: false });
+  }, [bulkSetEnableMut]);
   const bulkAddToGroup = useCallback((emails: string[], group: string) => {
     if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null);
     return bulkAddToGroupMut.mutateAsync({ emails, group });
@@ -423,6 +559,10 @@ export function useClients() {
     if (!email) return Promise.resolve(null as unknown as Msg<unknown>);
     return attachMut.mutateAsync({ email, inboundIds });
   }, [attachMut]);
+  const setExternalLinks = useCallback((email: string, externalLinks: ExternalLinkInput[]) => {
+    if (!email) return Promise.resolve(null as unknown as Msg<unknown>);
+    return setExternalLinksMut.mutateAsync({ email, externalLinks });
+  }, [setExternalLinksMut]);
   const bulkAttach = useCallback((emails: string[], inboundIds: number[]) => {
     if (!Array.isArray(emails) || emails.length === 0) return Promise.resolve(null as unknown as Msg<BulkAttachResult>);
     if (!Array.isArray(inboundIds) || inboundIds.length === 0) return Promise.resolve(null as unknown as Msg<BulkAttachResult>);
@@ -443,6 +583,15 @@ export function useClients() {
   }, [resetTrafficMut]);
   const resetAllTraffics = useCallback(() => resetAllTrafficsMut.mutateAsync(), [resetAllTrafficsMut]);
   const delDepleted = useCallback(() => delDepletedMut.mutateAsync(), [delDepletedMut]);
+  const delOrphans = useCallback(() => delOrphansMut.mutateAsync(), [delOrphansMut]);
+  const importClients = useCallback((data: string) => importClientsMut.mutateAsync(data), [importClientsMut]);
+  // Fetch the exported clients so the page can show them in a CodeMirror viewer
+  // (Copy / Download), rather than triggering an immediate browser download.
+  const exportClients = useCallback(async (): Promise<unknown[] | null> => {
+    const msg = await HttpUtil.get('/panel/api/clients/export');
+    if (!msg?.success) return null;
+    return Array.isArray(msg.obj) ? msg.obj : [];
+  }, []);
 
   const setEnable = useCallback(async (client: ClientRecord, enable: boolean) => {
     if (!client?.email) return null;
@@ -479,22 +628,49 @@ export function useClients() {
 
   const applyTrafficEvent = useCallback((payload: unknown) => {
     if (!payload || typeof payload !== 'object') return;
-    const p = payload as { onlineClients?: string[] };
+    const p = payload as {
+      onlineClients?: string[];
+      clientTraffics?: { email: string; up: number; down: number }[];
+    };
     if (Array.isArray(p.onlineClients)) {
       queryClient.setQueryData(keys.clients.onlines(), p.onlineClients);
+    }
+    if (Array.isArray(p.clientTraffics)) {
+      // Xray reports a row per client whether or not it moved a byte, so most of
+      // this map used to be zeros. A missing entry and a zero entry render
+      // identically (isActiveSpeed treats both as inactive), so the zeros are
+      // dropped and an unchanged result returns the previous object — which lets
+      // React bail out of the update instead of re-rendering the table.
+      const next: Record<string, ClientSpeedEntry> = {};
+      for (const ct of p.clientTraffics) {
+        if (!ct || !ct.email) continue;
+        const up = ct.up || 0;
+        const down = ct.down || 0;
+        if (up === 0 && down === 0) continue;
+        next[ct.email] = {
+          up: up / TRAFFIC_POLL_INTERVAL_S,
+          down: down / TRAFFIC_POLL_INTERVAL_S,
+        };
+      }
+      setClientSpeed((prev) => (sameSpeedMap(prev, next) ? prev : next));
     }
   }, [queryClient]);
 
   const applyClientStatsEvent = useCallback((payload: unknown) => {
     if (!payload || typeof payload !== 'object') return;
-    const p = payload as { clients?: ClientStatRow[] };
+    const p = payload as { clients?: ClientStatRow[]; snapshot?: boolean };
     if (!Array.isArray(p.clients) || p.clients.length === 0) return;
-    setAllClientStats(p.clients);
+    if (p.snapshot !== false) {
+      const rows = p.clients;
+      setAllClientStats((prev) => (sameSummaryInputs(prev, rows) ? prev : rows));
+    }
+    const active = queryRef.current;
+    if (!active) return;
     const byEmail = new Map<string, ClientTraffic>();
     for (const row of p.clients) {
       if (row && row.email) byEmail.set(row.email, row);
     }
-    queryClient.setQueryData<ClientPageResponse>(keys.clients.list(queryRef.current), (prev) => {
+    queryClient.setQueryData<ClientPageResponse>(keys.clients.list(active), (prev) => {
       if (!prev) return prev;
       let touched = false;
       const next = prev.items.slice();
@@ -532,7 +708,7 @@ export function useClients() {
     setQuery,
     inbounds,
     onlines,
-    loading,
+    transitioning,
     fetched,
     fetchError,
     subSettings,
@@ -541,6 +717,7 @@ export function useClients() {
     expireDiff,
     trafficDiff,
     pageSize,
+    settingsReady,
     refresh,
     create,
     bulkCreate,
@@ -548,16 +725,23 @@ export function useClients() {
     remove,
     bulkDelete,
     bulkAdjust,
+    bulkEnable,
+    bulkDisable,
     bulkAddToGroup,
     bulkRemoveFromGroup,
     attach,
+    setExternalLinks,
     bulkAttach,
     detach,
     bulkDetach,
     resetTraffic,
     resetAllTraffics,
     delDepleted,
+    delOrphans,
+    exportClients,
+    importClients,
     setEnable,
+    clientSpeed,
     applyTrafficEvent,
     applyClientStatsEvent,
   };

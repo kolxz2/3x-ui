@@ -1,5 +1,6 @@
-import axios from 'axios';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import i18next from 'i18next';
+import { httpRequest } from '@/api/http-init';
+import type { HttpResponse } from '@/api/http-init';
 import { getMessage } from './messageBus';
 
 type RespEnvelope = { success?: unknown; msg?: unknown; obj?: unknown };
@@ -16,8 +17,13 @@ export class Msg<T = unknown> {
   }
 }
 
-export interface HttpOptions extends AxiosRequestConfig {
+export interface HttpOptions {
+  headers?: Record<string, string> | Headers;
+  params?: unknown;
+  timeout?: number;
+  signal?: AbortSignal;
   silent?: boolean;
+  silentSuccess?: boolean;
 }
 
 export interface HttpModal {
@@ -26,15 +32,27 @@ export interface HttpModal {
 }
 
 export class HttpUtil {
-  static _handleMsg(msg: unknown): void {
+  static _handleMsg(msg: unknown, silentSuccess = false): void {
     if (!(msg instanceof Msg) || msg.msg === '') {
       return;
     }
-    const messageType = msg.success ? 'success' : 'error';
-    getMessage()[messageType](msg.msg);
+    if (msg.success) {
+      if (!silentSuccess) {
+        getMessage().success(msg.msg);
+      }
+      if (
+        msg.obj &&
+        typeof msg.obj === 'object' &&
+        (msg.obj as { nodePending?: unknown }).nodePending === true
+      ) {
+        getMessage().warning(i18next.t('pages.inbounds.toasts.savedNodeOfflineWillSync'));
+      }
+      return;
+    }
+    getMessage().error(msg.msg);
   }
 
-  static _respToMsg(resp: AxiosResponse | undefined): Msg {
+  static _respToMsg(resp: HttpResponse | undefined): Msg {
     if (!resp || !resp.data) {
       return new Msg(false, 'No response data');
     }
@@ -50,32 +68,34 @@ export class HttpUtil {
   }
 
   static async get<T = unknown>(url: string, params?: unknown, options: HttpOptions = {}): Promise<Msg<T>> {
-    const { silent, ...axiosOpts } = options;
+    const { silent, silentSuccess, ...rest } = options;
     try {
-      const resp = await axios.get(url, { params, ...axiosOpts });
+      const resp = await httpRequest('GET', url, undefined, { ...rest, params });
       const msg = this._respToMsg(resp) as Msg<T>;
-      if (!silent) this._handleMsg(msg);
+      if (!silent) this._handleMsg(msg, silentSuccess);
       return msg;
     } catch (error) {
       console.error('GET request failed:', error);
-      const err = error as AxiosError<{ message?: string }>;
-      const errorMsg = new Msg<T>(false, err.response?.data?.message || err.message || 'Request failed');
+      const err = error as { response?: { data?: { msg?: string; message?: string } }; message?: string };
+      const data = err.response?.data;
+      const errorMsg = new Msg<T>(false, data?.msg || data?.message || err.message || 'Request failed');
       if (!silent) this._handleMsg(errorMsg);
       return errorMsg;
     }
   }
 
   static async post<T = unknown>(url: string, data?: unknown, options: HttpOptions = {}): Promise<Msg<T>> {
-    const { silent, ...axiosOpts } = options;
+    const { silent, silentSuccess, ...rest } = options;
     try {
-      const resp = await axios.post(url, data, axiosOpts);
+      const resp = await httpRequest('POST', url, data, rest);
       const msg = this._respToMsg(resp) as Msg<T>;
-      if (!silent) this._handleMsg(msg);
+      if (!silent) this._handleMsg(msg, silentSuccess);
       return msg;
     } catch (error) {
       console.error('POST request failed:', error);
-      const err = error as AxiosError<{ message?: string }>;
-      const errorMsg = new Msg<T>(false, err.response?.data?.message || err.message || 'Request failed');
+      const err = error as { response?: { data?: { msg?: string; message?: string } }; message?: string };
+      const data = err.response?.data;
+      const errorMsg = new Msg<T>(false, data?.msg || data?.message || err.message || 'Request failed');
       if (!silent) this._handleMsg(errorMsg);
       return errorMsg;
     }
@@ -174,13 +194,20 @@ export class RandomUtil {
   }
 
   static randomShadowsocksPassword(method: string = '2022-blake3-aes-256-gcm'): string {
-    let length = 32;
-    if (method === '2022-blake3-aes-128-gcm') {
-      length = 16;
-    }
+    const length = method === '2022-blake3-aes-128-gcm' ? 16 : 32;
     const array = new Uint8Array(length);
     window.crypto.getRandomValues(array);
     return Base64.alternativeEncode(String.fromCharCode(...array));
+  }
+
+  static isShadowsocks2022Password(password: string, method: string): boolean {
+    if (!method || method.substring(0, 4) !== '2022') return true;
+    const expected = method === '2022-blake3-aes-128-gcm' ? 16 : 32;
+    try {
+      return window.atob(password).length === expected;
+    } catch {
+      return false;
+    }
   }
 
   static randomBase64(length: number = 16): string {
@@ -560,49 +587,42 @@ export class ClipboardManager {
   }
 
   static _legacyCopy(text: string): boolean {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.setAttribute('readonly', '');
-    textarea.setAttribute('aria-hidden', 'true');
-    textarea.style.position = 'absolute';
-    textarea.style.left = '-9999px';
-    textarea.style.top = '0';
-    textarea.style.opacity = '1';
+    const span = document.createElement('span');
+    span.textContent = text;
+    span.style.whiteSpace = 'pre';
+    span.style.position = 'absolute';
+    span.style.left = '-9999px';
+    span.style.top = '0';
 
-    const active = document.activeElement as HTMLElement | null;
-    const host = (active && active !== document.body && active.parentElement)
-      ? active.parentElement
-      : document.body;
-    host.appendChild(textarea);
+    document.body.appendChild(span);
 
-    const sel0 = document.getSelection();
-    const prevSelection = sel0 && sel0.rangeCount ? sel0.getRangeAt(0) : null;
+    const selection = window.getSelection();
+    if (!selection) {
+      document.body.removeChild(span);
+      return false;
+    }
+
+    const prevSelection = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+    selection.removeAllRanges();
+    const range = window.document.createRange();
+    range.selectNodeContents(span);
+    selection.addRange(range);
 
     let ok = false;
     try {
-      textarea.focus({ preventScroll: true });
-      textarea.select();
-      textarea.setSelectionRange(0, text.length);
-      // Routed through a dynamic lookup so the @deprecated tag on
-      // Document.execCommand doesn't surface here. execCommand is the
-      // only copy path that works in insecure contexts (HTTP panels
-      // behind IP/localhost) — reached only after navigator.clipboard
-      // fails or is unavailable.
       const exec = (document as unknown as Record<string, unknown>)['execCommand'];
       if (typeof exec === 'function') {
         ok = (exec as (cmd: string) => boolean).call(document, 'copy');
       }
     } catch {}
 
-    host.removeChild(textarea);
-    if (active && typeof active.focus === 'function') {
-      try { active.focus({ preventScroll: true }); } catch {}
-    }
+    selection.removeAllRanges();
     if (prevSelection) {
-      const sel = document.getSelection();
-      sel?.removeAllRanges();
-      sel?.addRange(prevSelection);
+      selection.addRange(prevSelection);
     }
+
+    document.body.removeChild(span);
     return ok;
   }
 }
@@ -623,8 +643,10 @@ export class Base64 {
   }
 
   static decode(content: string = ''): string {
+    const normalized = content.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
     return new TextDecoder().decode(
-      Uint8Array.from(window.atob(content), (c) => c.charCodeAt(0)),
+      Uint8Array.from(window.atob(padded), (c) => c.charCodeAt(0)),
     );
   }
 }
@@ -637,13 +659,18 @@ export class SizeFormatter {
   static readonly ONE_PB = SizeFormatter.ONE_TB * 1024;
 
   static sizeFormat(size: number | null | undefined): string {
-    if (size == null || size <= 0) return '0 B';
+    if (size == null || !Number.isFinite(size) || size <= 0) return '0 B';
     if (size < SizeFormatter.ONE_KB) return size.toFixed(0) + ' B';
     if (size < SizeFormatter.ONE_MB) return (size / SizeFormatter.ONE_KB).toFixed(2) + ' KB';
     if (size < SizeFormatter.ONE_GB) return (size / SizeFormatter.ONE_MB).toFixed(2) + ' MB';
     if (size < SizeFormatter.ONE_TB) return (size / SizeFormatter.ONE_GB).toFixed(2) + ' GB';
     if (size < SizeFormatter.ONE_PB) return (size / SizeFormatter.ONE_TB).toFixed(2) + ' TB';
     return (size / SizeFormatter.ONE_PB).toFixed(2) + ' PB';
+  }
+
+  // Same unit ladder as sizeFormat, expressed per-second.
+  static speedFormat(bps: number | null | undefined): string {
+    return SizeFormatter.sizeFormat(bps) + '/s';
   }
 }
 
@@ -658,6 +685,14 @@ export class CPUFormatter {
 }
 
 export class TimeFormatter {
+  static formatClock(unixSec: number): string {
+    const d = new Date(unixSec * 1000);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  }
+
   static formatSecond(second: number): string {
     if (second < 60) return second.toFixed(0) + 's';
     if (second < 3600) return (second / 60).toFixed(0) + 'm';
@@ -858,13 +893,13 @@ export class LanguageManager {
       });
 
       if (LanguageManager.isSupportLanguage(lang)) {
-        CookieManager.setCookie('lang', lang);
+        CookieManager.setCookie('lang', lang, 365);
       } else {
-        CookieManager.setCookie('lang', 'en-US');
+        CookieManager.setCookie('lang', 'en-US', 365);
         window.location.reload();
       }
     } else {
-      CookieManager.setCookie('lang', 'en-US');
+      CookieManager.setCookie('lang', 'en-US', 365);
       window.location.reload();
     }
 
@@ -875,7 +910,7 @@ export class LanguageManager {
     if (!LanguageManager.isSupportLanguage(language)) {
       language = 'en-US';
     }
-    CookieManager.setCookie('lang', language);
+    CookieManager.setCookie('lang', language, 365);
     window.location.reload();
   }
 
@@ -906,6 +941,8 @@ export type CalendarKind = 'gregorian' | 'jalalian';
 export class IntlUtil {
   static formatDate(date: string | number | Date | null | undefined, calendar: CalendarKind = 'gregorian'): string {
     if (date == null) return '';
+    const d = new Date(date);
+    if (!isFinite(d.getTime())) return '';
     const language = LanguageManager.getLanguage();
     const locale = calendar === 'jalalian' ? 'fa-IR' : language;
 
@@ -920,11 +957,12 @@ export class IntlUtil {
     };
 
     const intl = new Intl.DateTimeFormat(locale, intlOptions);
-    return intl.format(new Date(date));
+    return intl.format(d);
   }
 
   static formatRelativeTime(date: number | null | undefined): string {
     if (date == null) return '';
+    if (!isFinite(date)) return '';
     const language = LanguageManager.getLanguage();
     const now = new Date();
     const diff = date < 0

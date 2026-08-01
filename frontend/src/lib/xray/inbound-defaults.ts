@@ -3,6 +3,7 @@ import { RandomUtil, Wireguard } from '@/utils';
 import type { HttpInboundSettings } from '@/schemas/protocols/inbound/http';
 import type { HysteriaClient, HysteriaInboundSettings } from '@/schemas/protocols/inbound/hysteria';
 import type { MixedInboundSettings } from '@/schemas/protocols/inbound/mixed';
+import type { MtprotoClient, MtprotoInboundSettings } from '@/schemas/protocols/inbound/mtproto';
 import type { ShadowsocksClient, ShadowsocksInboundSettings } from '@/schemas/protocols/inbound/shadowsocks';
 import type { TrojanClient, TrojanInboundSettings } from '@/schemas/protocols/inbound/trojan';
 import type { TunInboundSettings } from '@/schemas/protocols/inbound/tun';
@@ -80,6 +81,7 @@ export function createDefaultVmessClient(seed: VmessClientSeed = {}): VmessClien
   return {
     id: seed.id ?? RandomUtil.randomUUID(),
     security: seed.security ?? 'auto',
+    alterId: 0,
     ...clientBase(seed),
   };
 }
@@ -162,7 +164,7 @@ export function createDefaultShadowsocksInboundSettings(
   return {
     method,
     password: seed.password ?? RandomUtil.randomShadowsocksPassword(method),
-    network: seed.network ?? 'tcp',
+    network: seed.network ?? 'tcp,udp',
     clients: [],
     ivCheck: seed.ivCheck ?? false,
   };
@@ -172,7 +174,7 @@ export function createDefaultShadowsocksInboundSettings(
 // constructor — the field discriminates v1 vs v2 inside the same settings
 // shape. Callers that explicitly want v1 pass `{ version: 1 }`.
 export interface HysteriaInboundSeed {
-  version?: number;
+  version?: 2;
 }
 
 export function createDefaultHysteriaInboundSettings(
@@ -200,6 +202,36 @@ export function createDefaultMixedInboundSettings(): MixedInboundSettings {
   };
 }
 
+function domainToHex(domain: string): string {
+  return Array.from(new TextEncoder().encode(domain))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// generateMtprotoSecret builds an "ee" FakeTLS secret: the marker, 16 random
+// bytes (32 hex chars), then the domain encoded as hex. Mirrors the Go
+// model.GenerateFakeTLSSecret; the backend re-derives it on save so this is
+// only for immediate display in the form.
+export function generateMtprotoSecret(domain: string): string {
+  return `ee${RandomUtil.randomSeq(32, { type: 'hex' })}${domainToHex(domain)}`;
+}
+
+export function createDefaultMtprotoInboundSettings(): MtprotoInboundSettings {
+  return {
+    fakeTlsDomain: 'www.cloudflare.com',
+    clients: [],
+  };
+}
+
+// createDefaultMtprotoClient seeds a new MTProto client with a fresh FakeTLS
+// secret fronting the given domain. Mirrors the WireGuard client default: the
+// backend re-derives the secret on save, so this is only for immediate display.
+export function createDefaultMtprotoClient(domain: string): Partial<MtprotoClient> {
+  return {
+    secret: generateMtprotoSecret(domain || 'www.cloudflare.com'),
+  };
+}
+
 export function createDefaultTunnelInboundSettings(): TunnelInboundSettings {
   return {
     portMap: {},
@@ -224,24 +256,20 @@ export interface WireguardInboundSeed {
   mtu?: number;
   secretKey?: string;
   noKernelTun?: boolean;
-  peerPrivateKey?: string;
 }
 
+// WireGuard is multi-client now: a new inbound holds only the server identity
+// (secretKey/mtu) and starts with no clients. Clients (peers) are added later
+// through the client modal, which generates each one's keypair and a unique
+// tunnel address. peers stays empty for backward-compatible parsing.
 export function createDefaultWireguardInboundSettings(
   seed: WireguardInboundSeed = {},
 ): WireguardInboundSettings {
-  const peerKp = seed.peerPrivateKey
-    ? { privateKey: seed.peerPrivateKey, publicKey: Wireguard.generateKeypair(seed.peerPrivateKey).publicKey }
-    : Wireguard.generateKeypair();
   return {
     mtu: seed.mtu ?? 1420,
     secretKey: seed.secretKey ?? Wireguard.generateKeypair().privateKey,
-    peers: [{
-      privateKey: peerKp.privateKey,
-      publicKey: peerKp.publicKey,
-      allowedIPs: ['10.0.0.2/32'],
-      keepAlive: 0,
-    }],
+    peers: [],
+    clients: [],
     noKernelTun: seed.noKernelTun ?? false,
   };
 }
@@ -261,7 +289,8 @@ export type AnyInboundSettings =
   | MixedInboundSettings
   | TunInboundSettings
   | TunnelInboundSettings
-  | WireguardInboundSettings;
+  | WireguardInboundSettings
+  | MtprotoInboundSettings;
 
 export function createDefaultInboundSettings(protocol: string): AnyInboundSettings | null {
   switch (protocol) {
@@ -275,6 +304,7 @@ export function createDefaultInboundSettings(protocol: string): AnyInboundSettin
     case 'tunnel':      return createDefaultTunnelInboundSettings();
     case 'tun':         return createDefaultTunInboundSettings();
     case 'wireguard':   return createDefaultWireguardInboundSettings();
+    case 'mtproto':     return createDefaultMtprotoInboundSettings();
     default:            return null;
   }
 }

@@ -3,7 +3,7 @@ import { cleanup } from '@testing-library/react';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import enUS from '../../../web/translation/en-US.json';
+import enUS from '../../../internal/web/translation/en-US.json';
 
 vi.mock('persian-calendar-suite', () => ({
   PersianDateTimePicker: () => null,
@@ -74,3 +74,10 @@ afterEach(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
 });
+
+import { HttpUtil } from '@/utils';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+vi.spyOn(HttpUtil, 'post').mockResolvedValue({ success: true, obj: {} } as any);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+vi.spyOn(HttpUtil, 'get').mockResolvedValue({ success: true, obj: {} } as any);

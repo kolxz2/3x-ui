@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -23,6 +24,7 @@ import {
   AppleOutlined,
   CopyOutlined,
   DownOutlined,
+  DownloadOutlined,
   MoonFilled,
   MoonOutlined,
   QrcodeOutlined,
@@ -31,7 +33,9 @@ import {
 } from '@ant-design/icons';
 
 import { ClipboardManager, IntlUtil, LanguageManager } from '@/utils';
-import { isPostQuantumLink } from '@/lib/xray/inbound-link';
+import { isPostQuantumLink, wireguardConfigFromLink } from '@/lib/xray/inbound-link';
+import { LinkTags, parseLinkParts } from '@/lib/xray/link-label';
+import ConfigBlock from '@/components/clients/ConfigBlock';
 import { setMessageInstance } from '@/utils/messageBus';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import SubUsageSummary from './SubUsageSummary';
@@ -57,7 +61,11 @@ const subClashUrl = subData.subClashUrl || '';
 const subTitle = subData.subTitle || '';
 const links: string[] = Array.isArray(subData.links) ? subData.links : [];
 const linkEmails: string[] = Array.isArray(subData.emails) ? subData.emails : [];
+const subEmail = [...new Set(linkEmails.filter(Boolean))].join(', ');
 const datepicker = subData.datepicker || 'gregorian';
+const announce = subData.announce || '';
+
+const appendRawView = (url: string) => `${url}${url.includes('?') ? '&' : '?'}view=raw`;
 
 const isUnlimited = totalByte <= 0 && expireMs === 0;
 const isActive = (() => {
@@ -70,72 +78,6 @@ const isActive = (() => {
   if (expireMs > 0 && Date.now() >= expireMs) return false;
   return true;
 })();
-
-const PROTOCOL_COLORS: Record<string, string> = {
-  VLESS: 'blue',
-  VMESS: 'geekblue',
-  TROJAN: 'volcano',
-  SS: 'magenta',
-  HYSTERIA: 'cyan',
-  HY2: 'green',
-};
-
-// Same idea as ClientInfoModal.trimEmail — strip the client email
-// suffix from the remark so the row title isn't ugly twice.
-function trimEmail(remark: string, email: string): string {
-  if (!email) return remark;
-  const e = email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return remark
-    .replace(new RegExp(`[-_.\\s|]+${e}$`), '')
-    .replace(new RegExp(`^${e}[-_.\\s|]+`), '')
-    .trim();
-}
-
-// Decode a base64 string as UTF-8. atob() returns a binary string where
-// each char holds one raw byte (Latin-1 interpretation), which mangles
-// any multi-byte UTF-8 sequence in the payload — most commonly the
-// emoji decorations the panel embeds in remarks (📊, ⏳).
-function base64DecodeUtf8(b64: string): string {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder('utf-8').decode(bytes);
-}
-
-function parseLinkMeta(link: string, idx: number): { protocol: string; remark: string } {
-  const fallback = `Link ${idx + 1}`;
-  if (!link) return { protocol: 'LINK', remark: fallback };
-  const schemeMatch = /^([a-z0-9]+):\/\//i.exec(link);
-  const scheme = schemeMatch?.[1]?.toLowerCase() ?? '';
-  const protocolMap: Record<string, string> = {
-    vless: 'VLESS',
-    vmess: 'VMESS',
-    trojan: 'TROJAN',
-    ss: 'SS',
-    hysteria: 'HYSTERIA',
-    hysteria2: 'HY2',
-    hy2: 'HY2',
-  };
-  const protocol = protocolMap[scheme] ?? scheme.toUpperCase() ?? 'LINK';
-
-  let remark = '';
-  if (scheme === 'vmess') {
-    try {
-      const body = link.slice('vmess://'.length).split('#')[0];
-      const json = JSON.parse(base64DecodeUtf8(body)) as { ps?: unknown };
-      if (typeof json?.ps === 'string') remark = json.ps;
-    } catch { /* fall through */ }
-  }
-  if (!remark) {
-    const hashIdx = link.indexOf('#');
-    if (hashIdx >= 0 && hashIdx + 1 < link.length) {
-      const raw = link.slice(hashIdx + 1);
-      try { remark = decodeURIComponent(raw); }
-      catch { remark = raw; }
-    }
-  }
-  return { protocol, remark: remark || fallback };
-}
 
 export default function SubPage() {
   const { t } = useTranslation();
@@ -176,6 +118,13 @@ export default function SubPage() {
     if (ok) messageApi.success(t('copied'));
   }, [t, messageApi]);
 
+  const copyAll = useCallback(async () => {
+    if (links.length === 0) return;
+    const allLinks = links.join('\n');
+    const ok = await ClipboardManager.copyText(allLinks);
+    if (ok) messageApi.success(t('subscription.copyAllConfigsCopied'));
+  }, [t, messageApi]);
+
   const open = useCallback((url: string) => {
     if (!url) return;
     window.open(url, '_blank');
@@ -185,9 +134,9 @@ export default function SubPage() {
     if (!subUrl) return '';
     const separator = subUrl.includes('?') ? '&' : '?';
     const rawUrl = subUrl + separator + 'flag=shadowrocket';
-    const base64Url = btoa(rawUrl).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const base64Url = btoa(rawUrl);
     const remark = encodeURIComponent(subTitle || sId || 'Subscription');
-    return `shadowrocket://add/sub/${base64Url}?remark=${remark}`;
+    return `shadowrocket://add/sub://${base64Url}?remark=${remark}`;
   }, []);
 
   const v2boxUrl = useMemo(
@@ -196,6 +145,7 @@ export default function SubPage() {
   );
   const streisandUrl = useMemo(() => `streisand://import/${encodeURIComponent(subUrl)}`, []);
   const happUrl = useMemo(() => `happ://add/${subUrl}`, []);
+  const incyUrl = useMemo(() => `incy://add/${subUrl}`, []);
 
   const pageClass = useMemo(() => {
     const classes = ['subscription-page'];
@@ -207,6 +157,7 @@ export default function SubPage() {
   const descriptionsItems = useMemo(() => {
     const items = [
       { key: 'subId', label: t('subscription.subId'), children: sId },
+      ...(subEmail ? [{ key: 'email', label: t('subscription.email'), children: subEmail }] : []),
       {
         key: 'status',
         label: t('subscription.status'),
@@ -256,6 +207,7 @@ export default function SubPage() {
     { key: 'android-v2raytun', label: 'V2RayTun', onClick: () => copy(subUrl) },
     { key: 'android-npvtunnel', label: 'NPV Tunnel', onClick: () => copy(subUrl) },
     { key: 'android-happ', label: 'Happ', onClick: () => open(`happ://add/${subUrl}`) },
+    { key: 'android-incy', label: 'Incy', onClick: () => open(`incy://add/${subUrl}`) },
   ], [copy, open]);
 
   const iosMenuItems = useMemo(() => [
@@ -265,7 +217,8 @@ export default function SubPage() {
     { key: 'ios-v2raytun', label: 'V2RayTun', onClick: () => copy(subUrl) },
     { key: 'ios-npvtunnel', label: 'NPV Tunnel', onClick: () => copy(subUrl) },
     { key: 'ios-happ', label: 'Happ', onClick: () => open(happUrl) },
-  ], [copy, open, shadowrocketUrl, v2boxUrl, streisandUrl, happUrl]);
+    { key: 'ios-incy', label: 'Incy', onClick: () => open(incyUrl) },
+  ], [copy, open, shadowrocketUrl, v2boxUrl, streisandUrl, happUrl, incyUrl]);
 
   const langMenuItems = useMemo(
     () => (LanguageManager.supportedLanguages as { value: string; name: string; icon: string }[]).map((l) => ({
@@ -335,6 +288,9 @@ export default function SubPage() {
           <Row justify="center">
             <Col xs={24} sm={22} md={18} lg={14} xl={12}>
               <Card hoverable className="subscription-card" title={cardTitle} extra={cardExtra}>
+                {announce && (
+                  <Alert type="info" showIcon title={announce} style={{ marginBottom: 16 }} />
+                )}
                 <Descriptions
                   bordered
                   column={1}
@@ -401,6 +357,15 @@ export default function SubPage() {
                             {sId}
                           </a>
                           <div className="sub-link-actions">
+                            <Button
+                              size="small"
+                              href={appendRawView(subJsonUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              icon={<DownloadOutlined />}
+                              aria-label={t('download')}
+                              title={t('download')}
+                            />
                             <Button size="small" icon={<CopyOutlined />} onClick={() => copy(subJsonUrl)} aria-label={t('copy')} title={t('copy')} />
                             <Popover
                               trigger="click"
@@ -433,6 +398,15 @@ export default function SubPage() {
                             {sId}
                           </a>
                           <div className="sub-link-actions">
+                            <Button
+                              size="small"
+                              href={appendRawView(subClashUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              icon={<DownloadOutlined />}
+                              aria-label={t('download')}
+                              title={t('download')}
+                            />
                             <Button size="small" icon={<CopyOutlined />} onClick={() => copy(subClashUrl)} aria-label={t('copy')} title={t('copy')} />
                             <Popover
                               trigger="click"
@@ -458,21 +432,32 @@ export default function SubPage() {
                   <>
                     <Divider>{t('pages.inbounds.copyLink')}</Divider>
                     <div className="links-section">
+                      <div className="sub-link-row">
+                        <span className="sub-link-title">{t('subscription.copyAllConfigs')}</span>
+                        <div className="sub-link-actions">
+                          <Button
+                            size="small"
+                            icon={<CopyOutlined />}
+                            onClick={copyAll}
+                            aria-label={t('subscription.copyAllConfigs')}
+                            title={t('subscription.copyAllConfigs')}
+                          />
+                        </div>
+                      </div>
                       {links.map((link, idx) => {
-                        const meta = parseLinkMeta(link, idx);
-                        const rowEmail = linkEmails[idx] || '';
-                        const rowTitle = trimEmail(meta.remark, rowEmail) || meta.remark;
-                        const qrLabel = rowEmail ? `${rowTitle}-${rowEmail}` : meta.remark;
+                        const parts = parseLinkParts(link);
+                        const fallback = `Link ${idx + 1}`;
+                        const rowTitle = parts?.remark || fallback;
+                        const qrLabel = parts?.remark || rowTitle;
                         const canQr = !isPostQuantumLink(link);
+                        const isWireguardLink = link.startsWith('wireguard://') || link.startsWith('wg://');
                         return (
-                          <div key={link} className="sub-link-row">
-                            <Tag
-                              color={PROTOCOL_COLORS[meta.protocol] ?? 'default'}
-                              className="sub-link-tag"
-                            >
-                              {meta.protocol}
-                            </Tag>
-                            <span className="sub-link-title" title={meta.remark}>
+                          <Fragment key={link}>
+                          <div className="sub-link-row">
+                            {parts
+                              ? <LinkTags parts={parts} />
+                              : <Tag className="sub-link-tag">LINK</Tag>}
+                            <span className="sub-link-title" title={rowTitle}>
                               {rowTitle}
                             </span>
                             <div className="sub-link-actions">
@@ -490,12 +475,7 @@ export default function SubPage() {
                                   destroyOnHidden
                                   content={
                                     <div className="sub-link-qr-popover">
-                                      <Tag
-                                        color={PROTOCOL_COLORS[meta.protocol] ?? 'default'}
-                                        className="qr-tag"
-                                      >
-                                        {qrLabel}
-                                      </Tag>
+                                      <Tag className="qr-tag">{qrLabel}</Tag>
                                       <QRCode
                                         value={link}
                                         size={220}
@@ -517,6 +497,16 @@ export default function SubPage() {
                               )}
                             </div>
                           </div>
+                          {isWireguardLink && (
+                            <ConfigBlock
+                              label={t('pages.clients.wireguardConfig')}
+                              text={wireguardConfigFromLink(link, rowTitle)}
+                              fileName={`${rowTitle || 'peer'}.conf`}
+                              qrRemark={rowTitle}
+                              tagColor="cyan"
+                            />
+                          )}
+                          </Fragment>
                         );
                       })}
                     </div>

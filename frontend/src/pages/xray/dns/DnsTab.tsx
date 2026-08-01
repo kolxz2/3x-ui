@@ -1,9 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Collapse, Empty, Input, InputNumber, Modal, Select, Space, Switch, Table } from 'antd';
-import { PlusOutlined, DeleteOutlined, MenuOutlined } from '@ant-design/icons';
+import { Alert, Button, Empty, Input, InputNumber, Modal, Select, Space, Switch, Table, Tabs } from 'antd';
+import {
+  DatabaseOutlined,
+  DeleteOutlined,
+  ExperimentOutlined,
+  MenuOutlined,
+  PlusOutlined,
+  ProfileOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 
+import { onNumber } from '@/utils/onNumber';
 import { SettingListItem } from '@/components/ui';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { catTabLabel } from '@/pages/settings/catTabLabel';
 import DnsServerModal from './DnsServerModal';
 import type { DnsServerValue } from './DnsServerModal';
 import DnsPresetsModal from './DnsPresetsModal';
@@ -21,6 +32,7 @@ interface DnsTabProps {
 
 export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTabProps) {
   const { t } = useTranslation();
+  const { isMobile } = useMediaQuery();
   const [modal, modalContextHolder] = Modal.useModal();
   const [hostsList, setHostsList] = useState<HostRow[]>([]);
   const [serverModalOpen, setServerModalOpen] = useState(false);
@@ -30,6 +42,23 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
 
   const dns = (templateSettings?.dns as DnsConfig | undefined) ?? null;
   const dnsEnabled = !!dns;
+  const sourceHosts = dns?.hosts;
+  const incomingHosts = JSON.stringify(sourceHosts ?? {});
+  const lastWrittenHostsRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!dnsEnabled) {
+      lastWrittenHostsRef.current = '{}';
+      setHostsList([]);
+      return;
+    }
+    if (incomingHosts === lastWrittenHostsRef.current) return;
+    lastWrittenHostsRef.current = incomingHosts;
+    setHostsList(Object.entries(sourceHosts ?? {}).map(([domain, values]) => ({
+      domain,
+      values: Array.isArray(values) ? [...values] : [String(values)],
+    })));
+  }, [dnsEnabled, incomingHosts, sourceHosts]);
 
   const mutate = useCallback(
     (mutator: (next: XraySettingsValue) => void) => {
@@ -67,32 +96,18 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
     });
   }
 
-  useEffect(() => {
-    if (!dns) {
-      setHostsList([]);
-      return;
-    }
-    const src = dns.hosts || {};
-    setHostsList(
-      Object.entries(src).map(([domain, val]) => ({
-        domain,
-        values: Array.isArray(val) ? [...val] : [String(val)],
-      })),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dnsEnabled]);
-
   function syncHosts(next: HostRow[]) {
+    const obj: Record<string, string | string[]> = {};
+    for (const row of next) {
+      if (!row.domain) continue;
+      const vals = (row.values || []).filter(Boolean);
+      if (vals.length === 0) continue;
+      obj[row.domain] = vals.length === 1 ? vals[0] : vals;
+    }
+    lastWrittenHostsRef.current = JSON.stringify(obj);
     setHostsList(next);
     mutate((tt) => {
       if (!tt.dns) return;
-      const obj: Record<string, string | string[]> = {};
-      for (const row of next) {
-        if (!row.domain) continue;
-        const vals = (row.values || []).filter(Boolean);
-        if (vals.length === 0) continue;
-        obj[row.domain] = vals.length === 1 ? vals[0] : vals;
-      }
       if (Object.keys(obj).length > 0) {
         (tt.dns as DnsConfig).hosts = obj;
       } else if ('hosts' in (tt.dns as DnsConfig)) {
@@ -117,16 +132,31 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
     return list.map((server, idx) => ({ key: idx, server }));
   }, [dns?.servers]);
 
+  // Stable callbacks: the column definitions in useDnsServerColumns are
+  // memoized, so they must be able to depend on these (see issue #5155)
+  const openEditServer = useCallback(
+    (idx: number) => {
+      setEditingServer((dns?.servers || [])[idx] || null);
+      setEditingIndex(idx);
+      setServerModalOpen(true);
+    },
+    [dns?.servers],
+  );
+  const deleteServer = useCallback(
+    (idx: number) => {
+      mutate((tt) => {
+        const cfg = tt.dns as DnsConfig | undefined;
+        if (cfg?.servers) cfg.servers.splice(idx, 1);
+      });
+    },
+    [mutate],
+  );
+
   const dnsColumns = useDnsServerColumns({ openEditServer, deleteServer });
 
   function openAddServer() {
     setEditingServer(null);
     setEditingIndex(null);
-    setServerModalOpen(true);
-  }
-  function openEditServer(idx: number) {
-    setEditingServer((dns?.servers || [])[idx] || null);
-    setEditingIndex(idx);
     setServerModalOpen(true);
   }
   function onServerConfirm(value: DnsServerValue) {
@@ -138,12 +168,6 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
       else cfg.servers[editingIndex] = value;
     });
     setServerModalOpen(false);
-  }
-  function deleteServer(idx: number) {
-    mutate((tt) => {
-      const cfg = tt.dns as DnsConfig | undefined;
-      if (cfg?.servers) cfg.servers.splice(idx, 1);
-    });
   }
   function clearAllServers() {
     modal.confirm({
@@ -171,6 +195,28 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
     return list.map((entry, idx) => ({ key: idx, ...entry }));
   }, [templateSettings?.fakedns]);
 
+  const deleteFakedns = useCallback(
+    (idx: number) => {
+      mutate((tt) => {
+        const list = tt.fakedns as FakednsRow[] | undefined;
+        if (!list) return;
+        list.splice(idx, 1);
+        if (list.length === 0) tt.fakedns = null;
+      });
+    },
+    [mutate],
+  );
+  const updateFakednsField = useCallback(
+    (idx: number, field: 'ipPool' | 'poolSize', value: string | number) => {
+      mutate((tt) => {
+        const list = tt.fakedns as FakednsRow[] | undefined;
+        if (!list?.[idx]) return;
+        (list[idx] as unknown as Record<string, unknown>)[field] = value;
+      });
+    },
+    [mutate],
+  );
+
   const fakednsColumns = useFakednsColumns({ deleteFakedns, updateFakednsField });
 
   function addFakedns() {
@@ -179,27 +225,12 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
       (tt.fakedns as FakednsRow[]).push(DEFAULT_FAKEDNS());
     });
   }
-  function deleteFakedns(idx: number) {
-    mutate((tt) => {
-      const list = tt.fakedns as FakednsRow[] | undefined;
-      if (!list) return;
-      list.splice(idx, 1);
-      if (list.length === 0) tt.fakedns = null;
-    });
-  }
-  function updateFakednsField(idx: number, field: 'ipPool' | 'poolSize', value: string | number) {
-    mutate((tt) => {
-      const list = tt.fakedns as FakednsRow[] | undefined;
-      if (!list?.[idx]) return;
-      (list[idx] as unknown as Record<string, unknown>)[field] = value;
-    });
-  }
 
   const items = useMemo(() => {
     const out = [
       {
         key: '1',
-        label: t('pages.xray.generalConfigs'),
+        label: catTabLabel(<SettingOutlined />, t('pages.xray.generalConfigs'), isMobile),
         children: (
           <>
             <SettingListItem
@@ -210,6 +241,12 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
             />
             {dnsEnabled && (
               <>
+                <Alert
+                  type="warning"
+                  showIcon
+                  title={t('pages.xray.dns.dnsLeakWarning')}
+                  style={{ marginBottom: 12 }}
+                />
                 <SettingListItem
                   paddings="small"
                   title={t('pages.xray.dns.tag')}
@@ -278,7 +315,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
                       min={0}
                       step={60}
                       style={{ width: '100%' }}
-                      onChange={(v) => setDnsField('serveExpiredTTL', Number(v) || 0)}
+                      onChange={onNumber((v) => setDnsField('serveExpiredTTL', v))}
                     />
                   }
                 />
@@ -292,7 +329,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
     if (dnsEnabled) {
       out.push({
         key: 'hosts',
-        label: t('pages.xray.dns.hosts'),
+        label: catTabLabel(<ProfileOutlined />, t('pages.xray.dns.hosts'), isMobile),
         children: hostsList.length === 0 ? (
           <Empty description={t('pages.xray.dns.hostsEmpty')}>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => syncHosts([...hostsList, { domain: '', values: [] }])}>
@@ -308,6 +345,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
               <div key={`h${idx}`} className="hosts-row">
                 <Input
                   value={row.domain}
+                  aria-label={t('pages.xray.dns.hostsDomain')}
                   placeholder={t('pages.xray.dns.hostsDomain')}
                   style={{ flex: '1 1 220px' }}
                   onChange={(e) => {
@@ -318,6 +356,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
                 <Select
                   mode="tags"
                   value={row.values}
+                  aria-label={t('pages.xray.dns.hostsValues')}
                   placeholder={t('pages.xray.dns.hostsValues')}
                   style={{ flex: '2 1 320px' }}
                   tokenSeparators={[',', ' ']}
@@ -326,7 +365,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
                     syncHosts(next);
                   }}
                 />
-                <Button danger icon={<DeleteOutlined />} onClick={() => syncHosts(hostsList.filter((_, i) => i !== idx))} />
+                <Button danger aria-label={t('delete')} icon={<DeleteOutlined />} onClick={() => syncHosts(hostsList.filter((_, i) => i !== idx))} />
               </div>
             ))}
           </Space>
@@ -335,7 +374,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
 
       out.push({
         key: '2',
-        label: 'DNS',
+        label: catTabLabel(<DatabaseOutlined />, 'DNS', isMobile),
         children: dnsServers.length === 0 ? (
           <Empty description={t('emptyDnsDesc')}>
             <Space>
@@ -374,7 +413,7 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
 
       out.push({
         key: '3',
-        label: 'Fake DNS',
+        label: catTabLabel(<ExperimentOutlined />, 'Fake DNS', isMobile),
         children: fakeDnsList.length === 0 ? (
           <Empty description={t('emptyFakeDnsDesc')}>
             <Button type="primary" icon={<PlusOutlined />} onClick={addFakedns}>
@@ -401,12 +440,12 @@ export default function DnsTab({ templateSettings, setTemplateSettings }: DnsTab
 
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, dnsEnabled, dns, hostsList, dnsServers, fakeDnsList]);
+  }, [t, isMobile, dnsEnabled, dns, hostsList, dnsServers, fakeDnsList]);
 
   return (
     <>
       {modalContextHolder}
-      <Collapse defaultActiveKey={['1']} items={items} />
+      <Tabs defaultActiveKey="1" items={items} />
       <DnsServerModal
         open={serverModalOpen}
         server={editingServer}

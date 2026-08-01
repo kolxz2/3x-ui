@@ -3,14 +3,19 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 	_ "unsafe"
 
+<<<<<<< HEAD
 	"github.com/kolxz2/3x-ui/v3/config"
 	"github.com/kolxz2/3x-ui/v3/database"
 	"github.com/kolxz2/3x-ui/v3/logger"
@@ -20,6 +25,20 @@ import (
 	"github.com/kolxz2/3x-ui/v3/web"
 	"github.com/kolxz2/3x-ui/v3/web/global"
 	"github.com/kolxz2/3x-ui/v3/web/service"
+=======
+	"github.com/mhsanaei/3x-ui/v3/internal/config"
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/sub"
+	"github.com/mhsanaei/3x-ui/v3/internal/tunnelmonitor"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
+	"github.com/mhsanaei/3x-ui/v3/internal/util/sys"
+	"github.com/mhsanaei/3x-ui/v3/internal/web"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/global"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
+>>>>>>> upstream/main
 
 	"github.com/joho/godotenv"
 	"github.com/op/go-logging"
@@ -27,7 +46,7 @@ import (
 
 // runWebServer initializes and starts the web server for the 3x-ui panel.
 func runWebServer() {
-	log.Printf("Starting %v %v", config.GetName(), config.GetVersion())
+	log.Printf("Starting %v %v", config.GetName(), config.GetPanelVersion())
 
 	switch config.GetLogLevel() {
 	case config.Debug:
@@ -44,34 +63,43 @@ func runWebServer() {
 		log.Fatalf("Unknown log level: %v", config.GetLogLevel())
 	}
 
-	godotenv.Load()
+	_ = godotenv.Load()
+
+	for _, line := range sys.ApplyMemoryTuning() {
+		logger.Info(line)
+	}
+
+	if os.Getenv("XUI_PPROF") == "true" {
+		go func() {
+			logger.Info("pprof profiling server listening on 127.0.0.1:6060")
+			if err := http.ListenAndServe("127.0.0.1:6060", nil); err != nil {
+				logger.Warning("pprof server stopped: ", err)
+			}
+		}()
+	}
 
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
 
-	var server *web.Server
-	server = web.NewServer()
+	server := web.NewServer()
 	global.SetWebServer(server)
 	err = server.Start()
 	if err != nil {
 		log.Fatalf("Error starting web server: %v", err)
-		return
 	}
 
-	var subServer *sub.Server
 	sub.SetDistFS(web.EmbeddedDist())
 	service.RegisterSubLinkProvider(sub.NewLinkProvider())
-	subServer = sub.NewServer()
+	subServer := sub.NewServer()
 	global.SetSubServer(subServer)
 	err = subServer.Start()
 	if err != nil {
 		log.Fatalf("Error starting sub server: %v", err)
-		return
 	}
 
-	sigCh := make(chan os.Signal, 1)
+	sigCh := make(chan os.Signal, 8)
 	// Trap shutdown signals
 	signal.Notify(sigCh, syscall.SIGHUP, syscall.SIGTERM, sys.SIGUSR1, os.Interrupt)
 	global.SetRestartHook(func() {
@@ -80,6 +108,27 @@ func runWebServer() {
 		default:
 		}
 	})
+
+	var stopTunnelHealthMonitor context.CancelFunc
+	monitorCfg := tunnelmonitor.ConfigFromEnv()
+	if monitorCfg.Enabled {
+		if monitorCfg.ProxyURL == "" {
+			logger.Warning("Tunnel health monitor enabled without XUI_TUNNEL_HEALTH_PROXY: the probe measures host connectivity, not the xray tunnel, so failures will restart xray without fixing host network issues")
+		}
+
+		monitorCtx, cancel := context.WithCancel(context.Background())
+		stopTunnelHealthMonitor = cancel
+
+		monitor, err := tunnelmonitor.New(monitorCfg, func(_ context.Context) error {
+			logger.Warning("Tunnel health monitor threshold reached, restarting xray-core")
+			return server.RestartXray()
+		})
+		if err != nil {
+			logger.Warning("Tunnel health monitor disabled: ", err)
+		} else {
+			go monitor.Run(monitorCtx)
+		}
+	}
 	for {
 		sig := <-sigCh
 
@@ -101,7 +150,6 @@ func runWebServer() {
 			err = server.StartPanelOnly()
 			if err != nil {
 				log.Fatalf("Error restarting web server: %v", err)
-				return
 			}
 			log.Println("Web server restarted successfully.")
 
@@ -111,7 +159,6 @@ func runWebServer() {
 			err = subServer.Start()
 			if err != nil {
 				log.Fatalf("Error restarting sub server: %v", err)
-				return
 			}
 			log.Println("Sub server restarted successfully.")
 		case sys.SIGUSR1:
@@ -122,12 +169,16 @@ func runWebServer() {
 			}
 
 		default:
+			if stopTunnelHealthMonitor != nil {
+				stopTunnelHealthMonitor()
+			}
+
 			// --- FIX FOR TELEGRAM BOT CONFLICT (409) on full shutdown ---
-			service.StopBot()
+			tgbot.StopBot()
 			// ------------------------------------------------------------
 
-			server.Stop()
-			subServer.Stop()
+			_ = server.Stop()
+			_ = subServer.Stop()
 			log.Println("Shutting down servers.")
 			return
 		}
@@ -176,7 +227,7 @@ func showSetting(show bool) {
 			fmt.Println("get key file failed, error info:", err)
 		}
 
-		userService := service.UserService{}
+		userService := panel.UserService{}
 		userModel, err := userService.GetFirstUser()
 		if err != nil {
 			fmt.Println("get current user info failed, error info:", err)
@@ -270,7 +321,7 @@ func updateSetting(port int, username string, password string, webBasePath strin
 	}
 
 	settingService := service.SettingService{}
-	userService := service.UserService{}
+	userService := panel.UserService{}
 
 	if port > 0 {
 		err := settingService.SetPort(port)
@@ -305,7 +356,7 @@ func updateSetting(port int, username string, password string, webBasePath strin
 		if err != nil {
 			fmt.Println("Failed to reset two-factor authentication:", err)
 		} else {
-			settingService.SetTwoFactorToken("")
+			_ = settingService.SetTwoFactorToken("")
 			fmt.Println("Two-factor authentication reset successfully")
 		}
 	}
@@ -315,7 +366,7 @@ func updateSetting(port int, username string, password string, webBasePath strin
 		if err != nil {
 			fmt.Println("Failed to set listen IP:", err)
 		} else {
-			fmt.Printf("listen %v set successfully", listenIP)
+			fmt.Printf("listen %v set successfully\n", listenIP)
 		}
 	}
 
@@ -401,14 +452,30 @@ func GetApiToken(getApiToken bool) {
 	if !getApiToken {
 		return
 	}
-	apiTokenService := service.ApiTokenService{}
+	err := database.InitDB(config.GetDBPath())
+	if err != nil {
+		fmt.Println("open database failed, error info:", err)
+		return
+	}
+	apiTokenService := panel.ApiTokenService{}
 	tokens, err := apiTokenService.List()
 	if err != nil {
 		fmt.Println("get apiToken failed, error info:", err)
 		return
 	}
 	if len(tokens) > 0 {
-		fmt.Println("apiToken:", tokens[0].Token)
+		fmt.Printf("There are %d API token(s) configured. Existing tokens cannot be retrieved in plaintext because only hashes are stored.\n", len(tokens))
+		fmt.Println("If you have lost your token, you can manage and generate new tokens through the Panel UI (Settings -> API Tokens).")
+
+		// Create a new fallback token so the CLI is still useful without the UI
+		fallbackName := fmt.Sprintf("cli-fallback-%d", time.Now().Unix())
+		created, err := apiTokenService.Create(fallbackName)
+		if err != nil {
+			fmt.Println("Failed to create a fallback API token:", err)
+			return
+		}
+		fmt.Println("\nA new fallback token has been generated for your convenience:")
+		fmt.Println("apiToken:", created.Token)
 		return
 	}
 	created, err := apiTokenService.Create("install")
@@ -423,6 +490,7 @@ func GetApiToken(getApiToken bool) {
 func migrateDb() {
 	inboundService := service.InboundService{}
 
+	logger.InitLogger(logging.INFO)
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
 		log.Fatal(err)
@@ -466,8 +534,14 @@ func main() {
 	migrateDbCmd := flag.NewFlagSet("migrate-db", flag.ExitOnError)
 	var migrateDsn string
 	var migrateSrc string
+	var migrateDump string
+	var migrateRestore string
+	var migrateOut string
 	migrateDbCmd.StringVar(&migrateDsn, "dsn", "", "Destination PostgreSQL DSN (postgres://user:pass@host:port/db?sslmode=disable)")
 	migrateDbCmd.StringVar(&migrateSrc, "src", "", "Source SQLite file (defaults to the configured x-ui.db)")
+	migrateDbCmd.StringVar(&migrateDump, "dump", "", "Write a portable SQL text dump of --src to this file (.db -> .dump)")
+	migrateDbCmd.StringVar(&migrateRestore, "restore", "", "Rebuild a SQLite database from this SQL text dump (.dump -> .db); requires --out")
+	migrateDbCmd.StringVar(&migrateOut, "out", "", "Destination SQLite file for --restore (must not already exist)")
 
 	settingCmd := flag.NewFlagSet("setting", flag.ExitOnError)
 	var port int
@@ -511,14 +585,14 @@ func main() {
 		fmt.Println()
 		fmt.Println("Commands:")
 		fmt.Println("    run            run web panel")
-		fmt.Println("    migrate        migrate form other/old x-ui")
-		fmt.Println("    migrate-db     copy data from the SQLite file into a PostgreSQL database")
+		fmt.Println("    migrate        migrate from other/old x-ui")
+		fmt.Println("    migrate-db     SQLite <-> .dump (--dump/--restore) or copy into PostgreSQL (--dsn)")
 		fmt.Println("    setting        set settings")
 	}
 
 	flag.Parse()
 	if showVersion {
-		fmt.Println(config.GetVersion())
+		fmt.Println(config.GetPanelVersion())
 		return
 	}
 
@@ -541,13 +615,30 @@ func main() {
 		if src == "" {
 			src = config.GetDBPath()
 		}
-		if migrateDsn == "" {
-			fmt.Println("--dsn is required: postgres://user:pass@host:port/dbname?sslmode=disable")
-			return
-		}
-		if err := database.MigrateData(src, migrateDsn); err != nil {
-			fmt.Println("migration failed:", err)
-			os.Exit(1)
+		switch {
+		case migrateDump != "":
+			if err := database.DumpSQLite(src, migrateDump); err != nil {
+				fmt.Println("dump failed:", err)
+				os.Exit(1)
+			}
+			fmt.Printf("Dumped %s -> %s\n", src, migrateDump)
+		case migrateRestore != "":
+			if migrateOut == "" {
+				fmt.Println("--out is required when using --restore: the destination .db path (must not exist)")
+				return
+			}
+			if err := database.RestoreSQLite(migrateRestore, migrateOut); err != nil {
+				fmt.Println("restore failed:", err)
+				os.Exit(1)
+			}
+			fmt.Printf("Restored %s -> %s\n", migrateRestore, migrateOut)
+		case migrateDsn != "":
+			if err := database.MigrateData(src, migrateDsn); err != nil {
+				fmt.Println("migration failed:", err)
+				os.Exit(1)
+			}
+		default:
+			fmt.Println("nothing to do: pass --dump <file>, --restore <file> --out <db>, or --dsn <postgres-dsn>")
 		}
 	case "setting":
 		err := settingCmd.Parse(os.Args[2:])
@@ -563,6 +654,9 @@ func main() {
 			if err = updateSetting(port, username, password, webBasePath, listenIP, resetTwoFactor); err != nil {
 				return
 			}
+		}
+		if webCertFile != "" || webKeyFile != "" {
+			updateCert(webCertFile, webKeyFile)
 		}
 		if show {
 			showSetting(show)

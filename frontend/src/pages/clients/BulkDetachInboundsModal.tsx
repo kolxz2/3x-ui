@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Select, Typography, message } from 'antd';
 
+import { SelectAllClearButtons } from '@/components/form';
 import type { InboundOption } from '@/hooks/useClients';
+import { formatInboundLabel } from '@/lib/inbounds/label';
 import type { BulkDetachResult } from '@/schemas/client';
 
-const MULTI_USER_PROTOCOLS = new Set(['vmess', 'vless', 'trojan', 'hysteria', 'shadowsocks']);
+const MULTI_USER_PROTOCOLS = new Set(['vmess', 'vless', 'trojan', 'hysteria', 'shadowsocks', 'wireguard', 'mtproto']);
 
 interface BulkDetachInboundsModalProps {
   open: boolean;
@@ -36,7 +38,7 @@ export default function BulkDetachInboundsModal({
       .filter((ib) => MULTI_USER_PROTOCOLS.has((ib.protocol || '').toLowerCase()))
       .map((ib) => ({
         value: ib.id,
-        label: ib.tag,
+        label: formatInboundLabel(ib.tag, ib.remark),
       }));
   }, [inbounds]);
 
@@ -79,18 +81,25 @@ export default function BulkDetachInboundsModal({
           {t('pages.clients.detachFromInboundsDesc', { count })}
         </Typography.Paragraph>
         {targetOptions.length === 0 ? (
-          <Alert type="info" showIcon message={t('pages.clients.detachFromInboundsNoTargets')} />
+          <Alert type="info" showIcon title={t('pages.clients.detachFromInboundsNoTargets')} />
         ) : (
-          <Select
-            mode="multiple"
-            style={{ width: '100%' }}
-            value={targetIds}
-            onChange={setTargetIds}
-            options={targetOptions}
-            placeholder={t('pages.clients.detachFromInboundsTargets')}
-            optionFilterProp="label"
-            autoFocus
-          />
+          <>
+            <SelectAllClearButtons
+              options={targetOptions}
+              value={targetIds}
+              onChange={setTargetIds}
+            />
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              value={targetIds}
+              onChange={setTargetIds}
+              options={targetOptions}
+              placeholder={t('pages.clients.detachFromInboundsTargets')}
+              showSearch={{ optionFilterProp: 'label' }}
+              autoFocus
+            />
+          </>
         )}
       </Modal>
     </>

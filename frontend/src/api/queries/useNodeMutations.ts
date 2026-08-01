@@ -15,9 +15,19 @@ export interface NodeUpdateResult {
   error?: string;
 }
 
+export interface RemoteInboundOption {
+  tag: string;
+  remark?: string;
+  protocol?: string;
+  port?: number;
+}
+
 export function useNodeMutations() {
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: keys.nodes.root() });
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: keys.nodes.root() });
+    queryClient.invalidateQueries({ queryKey: keys.inbounds.options() });
+  };
 
   const createMut = useMutation({
     mutationFn: (payload: Partial<NodeRecord>) =>
@@ -52,8 +62,8 @@ export function useNodeMutations() {
   });
 
   const updatePanelsMut = useMutation({
-    mutationFn: (ids: number[]) =>
-      HttpUtil.post<NodeUpdateResult[]>('/panel/api/nodes/updatePanel', { ids }, {
+    mutationFn: ({ ids, dev }: { ids: number[]; dev: boolean }) =>
+      HttpUtil.post<NodeUpdateResult[]>('/panel/api/nodes/updatePanel', { ids, dev }, {
         headers: { 'Content-Type': 'application/json' },
       }),
     onSuccess: (msg) => { if (msg?.success) invalidate(); },
@@ -65,12 +75,14 @@ export function useNodeMutations() {
     remove: (id: number) => removeMut.mutateAsync(id),
     setEnable: (id: number, enable: boolean) => setEnableMut.mutateAsync({ id, enable }),
     probe: (id: number) => probeMut.mutateAsync(id),
-    updatePanels: (ids: number[]): Promise<Msg<NodeUpdateResult[]>> => updatePanelsMut.mutateAsync(ids),
+    updatePanels: (ids: number[], dev: boolean): Promise<Msg<NodeUpdateResult[]>> => updatePanelsMut.mutateAsync({ ids, dev }),
     testConnection: async (payload: Partial<NodeRecord>): Promise<Msg<ProbeResult>> => {
       const raw = await HttpUtil.post('/panel/api/nodes/test', payload);
       return parseMsg(raw, ProbeResultSchema, 'nodes/test');
     },
     fetchFingerprint: (payload: Partial<NodeRecord>): Promise<Msg<string>> =>
       HttpUtil.post<string>('/panel/api/nodes/certFingerprint', payload),
+    fetchInbounds: (payload: Partial<NodeRecord>): Promise<Msg<RemoteInboundOption[]>> =>
+      HttpUtil.post<RemoteInboundOption[]>('/panel/api/nodes/inbounds', payload),
   };
 }

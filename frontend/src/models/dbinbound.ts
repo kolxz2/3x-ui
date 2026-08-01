@@ -30,6 +30,7 @@ export type DBInboundInit = Partial<{
     enable: boolean;
     expiryTime: number;
     trafficReset: string;
+    trafficResetDay: number;
     lastTrafficResetTime: number;
     listen: string;
     port: number;
@@ -40,6 +41,10 @@ export type DBInboundInit = Partial<{
     sniffing: RawJsonField;
     clientStats: ClientStats[];
     nodeId: number | null;
+    shareAddrStrategy: string;
+    shareAddr: string;
+    subSortIndex: number;
+    originNodeGuid: string;
     fallbackParent: FallbackParentRef | null;
 }>;
 
@@ -72,6 +77,7 @@ export class DBInbound {
     enable: boolean;
     expiryTime: number;
     trafficReset: string;
+    trafficResetDay: number;
     lastTrafficResetTime: number;
 
     listen: string;
@@ -83,6 +89,10 @@ export class DBInbound {
     sniffing: RawJsonField;
     clientStats: ClientStats[];
     nodeId: number | null;
+    shareAddrStrategy: string;
+    shareAddr: string;
+    subSortIndex: number;
+    originNodeGuid: string;
     fallbackParent: FallbackParentRef | null;
 
     private _clientStatsMap: Map<string, ClientStats> | null = null;
@@ -97,6 +107,7 @@ export class DBInbound {
         this.enable = true;
         this.expiryTime = 0;
         this.trafficReset = "never";
+        this.trafficResetDay = 1;
         this.lastTrafficResetTime = 0;
 
         this.listen = "";
@@ -108,6 +119,10 @@ export class DBInbound {
         this.sniffing = "";
         this.clientStats = [];
         this.nodeId = null;
+        this.shareAddrStrategy = "node";
+        this.shareAddr = "";
+        this.subSortIndex = 1;
+        this.originNodeGuid = "";
         this.fallbackParent = null;
         if (data == null) {
             return;

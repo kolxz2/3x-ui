@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 import {
   Alert,
   Button,
@@ -12,17 +13,8 @@ import {
   Row,
   Space,
   Spin,
-  Tabs,
-  Tooltip,
   message,
 } from 'antd';
-import {
-  CloudServerOutlined,
-  CodeOutlined,
-  MessageOutlined,
-  SafetyOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
 
 import { HttpUtil, PromiseUtil } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
@@ -34,6 +26,7 @@ import AppSidebar from '@/layouts/AppSidebar';
 import GeneralTab from './GeneralTab';
 import SecurityTab from './SecurityTab';
 import TelegramTab from './TelegramTab';
+import EmailTab from './EmailTab';
 import SubscriptionGeneralTab from './SubscriptionGeneralTab';
 import SubscriptionFormatsTab from './SubscriptionFormatsTab';
 import './SettingsPage.css';
@@ -42,16 +35,7 @@ interface ApiMsg {
   success?: boolean;
 }
 
-const tabSlugs = ['general', 'security', 'telegram', 'subscription', 'subscription-formats'];
-
-function slugToKey(slug: string): string {
-  const i = tabSlugs.indexOf(slug);
-  return i >= 0 ? String(i + 1) : '1';
-}
-
-function keyToSlug(key: string): string {
-  return tabSlugs[Number(key) - 1] || tabSlugs[0];
-}
+const tabSlugs = ['general', 'security', 'telegram', 'email', 'subscription', 'subscription-formats'];
 
 function isIp(h: string): boolean {
   if (typeof h !== 'string') return false;
@@ -92,6 +76,7 @@ export default function SettingsPage() {
     setSpinning,
     saveDisabled,
     saveAll,
+    savePayload,
   } = useAllSettings();
 
   const [entryHost, setEntryHost] = useState('');
@@ -108,21 +93,9 @@ export default function SettingsPage() {
   }, []);
 
   const [alertVisible, setAlertVisible] = useState(true);
-  const [activeTabKey, setActiveTabKey] = useState<string>(() => slugToKey(window.location.hash.slice(1)));
-
-  useEffect(() => {
-    const onHashChange = () => setActiveTabKey(slugToKey(window.location.hash.slice(1)));
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
-
-  function onTabChange(key: string) {
-    setActiveTabKey(key);
-    const slug = keyToSlug(key);
-    if (window.location.hash !== `#${slug}`) {
-      history.replaceState(null, '', `#${slug}`);
-    }
-  }
+  const location = useLocation();
+  const slug = location.hash.replace(/^#/, '');
+  const activeSlug = tabSlugs.includes(slug) ? slug : 'general';
 
   function rebuildUrlAfterRestart(): string {
     const { webDomain, webPort, webBasePath, webCertFile, webKeyFile } = allSetting;
@@ -171,7 +144,7 @@ export default function SettingsPage() {
       onOk: async () => {
         setSpinning(true);
         try {
-          const msg = await HttpUtil.post('/panel/setting/restartPanel') as ApiMsg;
+          const msg = await HttpUtil.post('/panel/api/setting/restartPanel') as ApiMsg;
           if (!msg?.success) return;
           await PromiseUtil.sleep(5000);
           window.location.replace(rebuildUrlAfterRestart());
@@ -222,58 +195,16 @@ export default function SettingsPage() {
     return classes.join(' ');
   }, [isDark, isUltra]);
 
-  const tabItems = useMemo(() => {
-    const items: { key: string; label: React.ReactNode; children: React.ReactNode }[] = [
-      {
-        key: '1',
-        label: (
-          <Tooltip title={isMobile ? t('pages.settings.panelSettings') : null}>
-            <span><SettingOutlined />{!isMobile && <> {t('pages.settings.panelSettings')}</>}</span>
-          </Tooltip>
-        ),
-        children: <GeneralTab allSetting={allSetting} updateSetting={updateSetting} />,
-      },
-      {
-        key: '2',
-        label: (
-          <Tooltip title={isMobile ? t('pages.settings.securitySettings') : null}>
-            <span><SafetyOutlined />{!isMobile && <> {t('pages.settings.securitySettings')}</>}</span>
-          </Tooltip>
-        ),
-        children: <SecurityTab allSetting={allSetting} updateSetting={updateSetting} />,
-      },
-      {
-        key: '3',
-        label: (
-          <Tooltip title={isMobile ? t('pages.settings.TGBotSettings') : null}>
-            <span><MessageOutlined />{!isMobile && <> {t('pages.settings.TGBotSettings')}</>}</span>
-          </Tooltip>
-        ),
-        children: <TelegramTab allSetting={allSetting} updateSetting={updateSetting} />,
-      },
-      {
-        key: '4',
-        label: (
-          <Tooltip title={isMobile ? t('pages.settings.subSettings') : null}>
-            <span><CloudServerOutlined />{!isMobile && <> {t('pages.settings.subSettings')}</>}</span>
-          </Tooltip>
-        ),
-        children: <SubscriptionGeneralTab allSetting={allSetting} updateSetting={updateSetting} />,
-      },
-    ];
-    if (allSetting.subJsonEnable || allSetting.subClashEnable) {
-      items.push({
-        key: '5',
-        label: (
-          <Tooltip title={isMobile ? `${t('pages.settings.subSettings')} (Formats)` : null}>
-            <span><CodeOutlined />{!isMobile && <> {t('pages.settings.subSettings')} (Formats)</>}</span>
-          </Tooltip>
-        ),
-        children: <SubscriptionFormatsTab allSetting={allSetting} updateSetting={updateSetting} />,
-      });
+  const categoryBody = useMemo(() => {
+    switch (activeSlug) {
+      case 'security': return <SecurityTab allSetting={allSetting} updateSetting={updateSetting} saveSetting={savePayload} />;
+      case 'telegram': return <TelegramTab allSetting={allSetting} updateSetting={updateSetting} />;
+      case 'email': return <EmailTab allSetting={allSetting} updateSetting={updateSetting} />;
+      case 'subscription': return <SubscriptionGeneralTab allSetting={allSetting} updateSetting={updateSetting} />;
+      case 'subscription-formats': return <SubscriptionFormatsTab allSetting={allSetting} updateSetting={updateSetting} />;
+      default: return <GeneralTab allSetting={allSetting} updateSetting={updateSetting} />;
     }
-    return items;
-  }, [allSetting, updateSetting, isMobile, t]);
+  }, [activeSlug, allSetting, updateSetting, savePayload]);
 
   return (
     <ConfigProvider theme={antdThemeConfig}>
@@ -331,12 +262,7 @@ export default function SettingsPage() {
 
                     <Col span={24}>
                       <Card hoverable>
-                        <Tabs
-                          activeKey={activeTabKey}
-                          onChange={onTabChange}
-                          className={isMobile ? 'icons-only' : ''}
-                          items={tabItems}
-                        />
+                        {categoryBody}
                       </Card>
                     </Col>
                   </Row>

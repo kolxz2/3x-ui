@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { SockoptStreamSettingsSchema } from '@/schemas/protocols/stream/sockopt';
+
 export const TlsVersionSchema = z.enum(['1.0', '1.1', '1.2', '1.3']);
 export type TlsVersion = z.infer<typeof TlsVersionSchema>;
 
@@ -22,6 +24,9 @@ export const UtlsFingerprintSchema = z.enum([
 ]);
 export type UtlsFingerprint = z.infer<typeof UtlsFingerprintSchema>;
 
+export const TlsFingerprintSchema = z.union([UtlsFingerprintSchema, z.literal('')]);
+export type TlsFingerprint = z.infer<typeof TlsFingerprintSchema>;
+
 export const AlpnSchema = z.enum(['h3', 'h2', 'http/1.1']);
 export type Alpn = z.infer<typeof AlpnSchema>;
 
@@ -34,6 +39,7 @@ export type TlsCertUsage = z.infer<typeof TlsCertUsageSchema>;
 export const TlsCertFileSchema = z.object({
   certificateFile: z.string().min(1),
   keyFile: z.string().min(1),
+  ocspStapling: z.number().default(0),
   oneTimeLoading: z.boolean().default(false),
   usage: TlsCertUsageSchema.default('encipherment'),
   buildChain: z.boolean().default(false),
@@ -41,6 +47,7 @@ export const TlsCertFileSchema = z.object({
 export const TlsCertInlineSchema = z.object({
   certificate: z.array(z.string()),
   key: z.array(z.string()),
+  ocspStapling: z.number().default(0),
   oneTimeLoading: z.boolean().default(false),
   usage: TlsCertUsageSchema.default('encipherment'),
   buildChain: z.boolean().default(false),
@@ -49,9 +56,14 @@ export const TlsCertSchema = z.union([TlsCertFileSchema, TlsCertInlineSchema]);
 export type TlsCert = z.infer<typeof TlsCertSchema>;
 
 export const TlsClientSettingsSchema = z.object({
-  fingerprint: UtlsFingerprintSchema.default('chrome'),
+  fingerprint: TlsFingerprintSchema.default('chrome'),
   echConfigList: z.string().default(''),
   pinnedPeerCertSha256: z.array(z.string()).default([]),
+  // Panel-only client directive (v2rayN `vcn`): verify the server certificate
+  // against this name instead of the SNI. Comma-separated names. Shipped in
+  // share links / subscriptions; the modern replacement for `allowInsecure`,
+  // which xray-core removed after 2026-06-01.
+  verifyPeerCertByName: z.string().default(''),
 });
 export type TlsClientSettings = z.infer<typeof TlsClientSettingsSchema>;
 
@@ -68,6 +80,12 @@ export const TlsStreamSettingsSchema = z.object({
   certificates: z.array(TlsCertSchema).default([]),
   alpn: z.array(AlpnSchema).default(['h2', 'http/1.1']),
   echServerKeys: z.string().default(''),
-  settings: TlsClientSettingsSchema.default({ fingerprint: 'chrome', echConfigList: '', pinnedPeerCertSha256: [] }),
+  // Server-side TLS fields (xray-core TLSConfig top-level): survive the
+  // panel-only `settings` strip and reach the runtime config. Optional so
+  // existing inbounds round-trip unchanged.
+  curvePreferences: z.array(z.string()).optional(),
+  masterKeyLog: z.string().optional(),
+  echSockopt: SockoptStreamSettingsSchema.optional(),
+  settings: TlsClientSettingsSchema.default({ fingerprint: 'chrome', echConfigList: '', pinnedPeerCertSha256: [], verifyPeerCertByName: '' }),
 });
 export type TlsStreamSettings = z.infer<typeof TlsStreamSettingsSchema>;

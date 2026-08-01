@@ -1,4 +1,4 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
+[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
 
 <p align="center">
   <picture>
@@ -13,8 +13,12 @@
   <a href="#"><img src="https://img.shields.io/github/go-mod/go-version/kolxz2/3x-ui.svg" alt="GO Version"></a>
   <a href="https://github.com/kolxz2/3x-ui/releases/latest"><img src="https://img.shields.io/github/downloads/kolxz2/3x-ui/total.svg" alt="Downloads"></a>
   <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true" alt="License"></a>
+<<<<<<< HEAD
   <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
   <a href="https://goreportcard.com/report/github.com/kolxz2/3x-ui/v3"><img src="https://goreportcard.com/badge/github.com/kolxz2/3x-ui/v3" alt="Go Report Card"></a>
+=======
+  <a href="https://pkg.go.dev/github.com/mhsanaei/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/mhsanaei/3x-ui/v3.svg" alt="Go Reference"></a>
+>>>>>>> upstream/main
 </p>
 
 **3X-UI** is an advanced, open-source web control panel for managing [Xray-core](https://github.com/XTLS/Xray-core) servers. It provides a clean, multi-language interface for deploying, configuring, and monitoring a wide range of proxy and VPN protocols — from a single VPS to multi-node deployments.
@@ -33,7 +37,7 @@ Built as an enhanced fork of the original X-UI project, 3X-UI adds broader proto
 - **Traffic statistics** — per inbound, per client, and per outbound, with reset controls.
 - **Multi-node support** — manage and scale across multiple servers from a single panel.
 - **Outbound & routing** — WARP, NordVPN, custom routing rules, load balancers, and outbound proxy chaining.
-- **Built-in subscription server** with multiple output formats.
+- **Built-in subscription server** with multiple output formats and [custom page templates](docs/custom-subscription-templates.md).
 - **Telegram bot** for remote monitoring and management.
 - **RESTful API** with in-panel Swagger documentation.
 - **Flexible storage** — SQLite (default) or PostgreSQL.
@@ -73,9 +77,31 @@ Built as an enhanced fork of the original X-UI project, 3X-UI adds broader proto
 bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh)
 ```
 
+To install a specific version, append its tag (e.g. `v3.4.0`):
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.4.0
+```
+
+To install the rolling **dev** build (latest per-commit pre-release from `main`, not a stable release), pass `dev-latest`:
+
+```bash
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
+```
+
 During installation a random username, password, and access path are generated. After installation, run `x-ui` to open the management menu, where you can start/stop the service, view or reset your login credentials, manage SSL certificates, and more.
 
 For full documentation, please visit the [project Wiki](https://github.com/kolxz2/3x-ui/wiki).
+
+### Unattended install
+
+The installer also runs **non-interactively** for cloud-init.
+Set `XUI_NONINTERACTIVE=1` (or pipe with no TTY) and it installs end-to-end with
+zero prompts, generating random credentials and writing them to
+`/etc/x-ui/install-result.env`. See [`deploy/`](deploy/) for:
+
+- [Cloud-init user-data](deploy/cloud-init/) — unattended install on any cloud (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
+- [Hetzner Cloud notes](deploy/marketplace/hetzner/) — cloud-init deployment on Hetzner
 
 ## Supported Platforms
 
@@ -201,9 +227,17 @@ docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/kolxz2/3x-ui
 | `XUI_DB_FOLDER` | Directory for the SQLite database file | `/etc/x-ui` |
 | `XUI_DB_MAX_OPEN_CONNS` | Maximum open connections (PostgreSQL pool) | — |
 | `XUI_DB_MAX_IDLE_CONNS` | Maximum idle connections (PostgreSQL pool) | — |
+| `XUI_INIT_WEB_BASE_PATH` | The initial URI path for the web panel | `/` |
 | `XUI_ENABLE_FAIL2BAN` | Enable Fail2ban-based IP-limit enforcement | `true` |
 | `XUI_LOG_LEVEL` | Log verbosity (`debug`, `info`, `warning`, `error`) | `info` |
 | `XUI_DEBUG` | Enable debug mode | `false` |
+| `XUI_TUNNEL_HEALTH_MONITOR` | Enable the tunnel health monitor (probes a URL and restarts xray after repeated failures; a restart drops all clients) | `false` |
+| `XUI_TUNNEL_HEALTH_PROXY` | Proxy the probe is sent through; point it at a local xray inbound so the probe tests the tunnel (e.g. `socks5://127.0.0.1:1080`). Empty means the probe only checks host connectivity | — |
+| `XUI_TUNNEL_HEALTH_URL` | URL probed for tunnel health | `https://www.cloudflare.com/cdn-cgi/trace` |
+| `XUI_TUNNEL_HEALTH_INTERVAL` | Interval between probes | `30s` |
+| `XUI_TUNNEL_HEALTH_TIMEOUT` | Per-probe timeout | `10s` |
+| `XUI_TUNNEL_HEALTH_FAILURES` | Consecutive failures before a restart is triggered | `3` |
+| `XUI_TUNNEL_HEALTH_COOLDOWN` | Minimum delay between consecutive restarts | `5m` |
 
 ## Supported Languages
 
@@ -256,45 +290,92 @@ List remote branches:
 git branch -r
 ```
 
-**Option 1 — merge (simpler).** On your machine, in your `main` branch:
+**Option 1 — merge (recommended).** On your machine, in your `main` branch:
 
 ```bash
 git checkout main
+git fetch upstream
 git merge upstream/main
 git push origin main
 ```
-
-Resolve merge conflicts if Git reports any, then commit and push again.
 
 **Option 2 — rebase (linear history).** Use only if you are comfortable with rebasing:
 
 ```bash
 git checkout main
+git fetch upstream
 git rebase upstream/main
 git push origin main
 ```
 
 If you already pushed your old `main` to GitHub, a rebase may require `git push --force-with-lease origin main` — use that only when you intend to rewrite remote history.
 
+#### Resolving merge conflicts
+
+After a long gap between syncs, Git may report many conflicts — especially **modify/delete** on old paths (`web/`, `database/`, `xray/`, `sub/`, `config/version`) that upstream moved into `internal/`. That is expected.
+
+**Accept all upstream changes** (take upstream code, drop stale fork paths):
+
+```bash
+git checkout --theirs .
+git add -A
+git commit -m "Merge upstream/main"
+git push origin main
+```
+
+During a merge, **`theirs` = `upstream/main`**, **`ours` = your fork**. If `git checkout --theirs` reports *“does not have their version”* for deleted legacy files, remove them explicitly:
+
+```bash
+git rm config/version database/db.go web/web.go xray/process.go
+git add -A
+git commit -m "Merge upstream/main"
+```
+
+**Keep fork-only edits** (README badges/links, `amnezia_sites.json`, install URLs pointing to `kolxz2/3x-ui`) in a separate commit *after* the merge commit, so the next upstream sync stays simple.
+
+#### After each upstream sync
+
+1. Check status: `git status` (must be clean before you push).
+2. Compare with upstream: `git log --oneline main..upstream/main` — empty output means you are up to date.
+3. Re-apply any fork-only changes you still need (README, subscription rules, etc.).
+4. Build locally if you develop on the panel:
+
+   ```bash
+   cd frontend && npm ci && npm run build && cd ..
+   go run .
+   ```
+
+   See [`CONTRIBUTING.md`](/CONTRIBUTING.md) and `make help` for the full dev workflow (`make verify`, `make gen`, …).
+
+### Fork-only customizations in this repo
+
+| What | Where |
+| --- | --- |
+| Install / Docker image URLs | `README*.md`, `install.sh` — point to `kolxz2/3x-ui` |
+| Subscription routing (Amnezia split-tunnel) | [`amnezia_sites.json`](amnezia_sites.json) → regenerate with `node scripts/gen-sub-json-rules.mjs` |
+| Release binaries | GitHub Actions [`.github/workflows/release.yml`](/.github/workflows/release.yml) on your fork |
+
+Upstream code lives under `internal/` (not the old top-level `web/`, `database/`, `xray/`). Version file: [`internal/config/version`](internal/config/version).
+
 ### Publish a GitHub Release (binaries)
 
 You **do not** need to create a release manually in the GitHub UI. The **Release 3X-UI** workflow builds Linux/Windows archives and attaches them to a release when you push a **version tag**.
 
-1. Update the version in [`config/version`](config/version) and commit your changes.
+1. Set the version in [`internal/config/version`](internal/config/version) (must match the tag, without the `v` prefix) and commit.
 2. Push to your fork:
 
    ```bash
    git push origin main
    ```
 
-3. Create and push a tag with a **`v` prefix** (required by the workflow), for example `v3.2.6.2`:
+3. Create and push a tag with a **`v` prefix** (required by the workflow), for example `v3.6.0`:
 
    ```bash
-   git tag v3.2.6.2
-   git push origin v3.2.6.2
+   git tag v3.6.0
+   git push origin v3.6.0
    ```
 
-   Tags like `3.2.6.2` **without** `v` will **not** trigger upload to [Releases](https://github.com/kolxz2/3x-ui/releases).
+   Tags like `3.6.0` **without** `v` will **not** trigger upload to [Releases](https://github.com/kolxz2/3x-ui/releases).
 
 4. Wait for the workflow on the [Actions](https://github.com/kolxz2/3x-ui/actions) tab (~10–15 minutes). When it finishes, open **Releases** — assets such as `x-ui-linux-amd64.tar.gz` and `x-ui-windows-amd64.zip` should appear under that tag.
 

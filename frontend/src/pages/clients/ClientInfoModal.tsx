@@ -1,23 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Divider, Modal, Popover, Tag, Tooltip, message } from 'antd';
-import { CopyOutlined, EyeOutlined, QrcodeOutlined, ReloadOutlined } from '@ant-design/icons';
+import { CopyOutlined, DownloadOutlined, EyeOutlined, QrcodeOutlined, ReloadOutlined } from '@ant-design/icons';
 
-import { ClipboardManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
+import { ClipboardManager, FileManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
+import { formatInboundLabel } from '@/lib/inbounds/label';
+import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import type { ClientRecord, InboundOption } from '@/hooks/useClients';
 import { isPostQuantumLink } from '@/lib/xray/inbound-link';
+import { LinkTags, linkMetaText, parseLinkParts } from '@/lib/xray/link-label';
 import { QrPanel } from '@/pages/inbounds/qr';
+import ConfigBlock from '@/components/clients/ConfigBlock';
+import { buildWireguardClientConfig, findWireguardInbound, isWireguardClient } from './wireguardConfig';
 import './ClientInfoModal.css';
-
-const PROTOCOL_COLORS: Record<string, string> = {
-  VLESS: 'blue',
-  VMESS: 'geekblue',
-  TROJAN: 'volcano',
-  SS: 'magenta',
-  HYSTERIA: 'cyan',
-  HY2: 'green',
-};
 
 const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
   vless: 'blue',
@@ -34,64 +30,6 @@ const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
 
 const INBOUND_CHIP_LIMIT = 1;
 
-// 3x-ui's genRemark concatenates inbound remark + client email (and an
-// optional extra) using a configurable separator. The email half is
-// redundant in the row title — the modal already names the client by
-// email at the top — so trimEmail strips it back out for the row only.
-// The original remark is preserved for the QR (it's the QR's own name).
-function trimEmail(remark: string, email: string): string {
-  if (!email) return remark;
-  const e = email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return remark
-    .replace(new RegExp(`[-_.\\s|]+${e}$`), '')
-    .replace(new RegExp(`^${e}[-_.\\s|]+`), '')
-    .trim();
-}
-
-// Decode a base64 string as UTF-8. atob() returns a binary string where
-// each char holds one raw byte (Latin-1 interpretation), which mangles
-// any multi-byte UTF-8 sequence in the payload — most commonly the
-// emoji decorations the panel embeds in remarks (📊, ⏳).
-function base64DecodeUtf8(b64: string): string {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder('utf-8').decode(bytes);
-}
-
-function parseLinkMeta(link: string): { protocol: string; remark: string } {
-  const schemeMatch = /^([a-z0-9]+):\/\//i.exec(link);
-  const scheme = schemeMatch?.[1]?.toLowerCase() ?? '';
-  const protocolMap: Record<string, string> = {
-    vless: 'VLESS',
-    vmess: 'VMESS',
-    trojan: 'TROJAN',
-    ss: 'SS',
-    hysteria: 'HYSTERIA',
-    hysteria2: 'HY2',
-    hy2: 'HY2',
-  };
-  const protocol = protocolMap[scheme] ?? scheme.toUpperCase() ?? 'LINK';
-
-  let remark = '';
-  if (scheme === 'vmess') {
-    try {
-      const body = link.slice('vmess://'.length).split('#')[0];
-      const json = JSON.parse(base64DecodeUtf8(body)) as { ps?: unknown };
-      if (typeof json?.ps === 'string') remark = json.ps;
-    } catch { /* fall through to fragment parsing */ }
-  }
-  if (!remark) {
-    const hashIdx = link.indexOf('#');
-    if (hashIdx >= 0) {
-      const raw = link.slice(hashIdx + 1);
-      try { remark = decodeURIComponent(raw); }
-      catch { remark = raw; }
-    }
-  }
-  return { protocol, remark };
-}
-
 interface SubSettings {
   enable: boolean;
   subURI: string;
@@ -99,6 +37,7 @@ interface SubSettings {
   subJsonEnable: boolean;
   subClashURI: string;
   subClashEnable: boolean;
+  publicHost?: string;
 }
 
 interface ClientInfoModalProps {
@@ -122,7 +61,14 @@ const DEFAULT_SUB: SubSettings = {
   subJsonEnable: false,
   subClashURI: '',
   subClashEnable: false,
+  publicHost: '',
 };
+
+const SUBSCRIPTION_DOWNLOAD_NAMES = {
+  standard: 'subscription-standard.txt',
+  json: 'subscription-json.json',
+  clash: 'subscription-clash.yaml',
+} as const;
 
 export default function ClientInfoModal({
   open,
@@ -145,10 +91,11 @@ export default function ClientInfoModal({
   const dateLabel = (ts?: number) => (!ts || ts <= 0 ? '-' : IntlUtil.formatDate(ts, datepicker));
   const [messageApi, messageContextHolder] = message.useMessage();
   const [links, setLinks] = useState<string[]>([]);
-  const [clientIps, setClientIps] = useState<string[]>([]);
+  const [clientIps, setClientIps] = useState<ClientIpInfo[]>([]);
   const [ipsLoading, setIpsLoading] = useState(false);
   const [ipsClearing, setIpsClearing] = useState(false);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<keyof typeof SUBSCRIPTION_DOWNLOAD_NAMES | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -196,11 +143,31 @@ export default function ClientInfoModal({
   }, [client?.subId, subSettings?.subClashEnable, subSettings?.subClashURI]);
 
   const showSubscription = !!(subSettings?.enable && client?.subId);
+  const wgInbound = useMemo(() => findWireguardInbound(client, inboundsById), [client, inboundsById]);
+  const wgConfigText = useMemo(() => {
+    if (!client || !wgInbound || !isWireguardClient(client)) return '';
+    return buildWireguardClientConfig(client, wgInbound, window.location.hostname, subSettings?.publicHost ?? '');
+  }, [client, wgInbound, subSettings?.publicHost]);
 
   async function copyValue(text: string) {
     if (!text) return;
     const ok = await ClipboardManager.copyText(String(text));
     if (ok) messageApi.success(t('copied'));
+  }
+
+  async function downloadSubscription(url: string, format: keyof typeof SUBSCRIPTION_DOWNLOAD_NAMES) {
+    if (!url || downloadingFormat) return;
+    setDownloadingFormat(format);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Subscription download failed');
+      const content = await response.text();
+      FileManager.downloadTextFile(content, SUBSCRIPTION_DOWNLOAD_NAMES[format]);
+    } catch (_) {
+      messageApi.error(t('somethingWentWrong'));
+    } finally {
+      setDownloadingFormat(null);
+    }
   }
 
   async function loadIps() {
@@ -209,8 +176,7 @@ export default function ClientInfoModal({
     try {
       const msg = await HttpUtil.post(`/panel/api/clients/ips/${encodeURIComponent(client.email)}`) as ApiMsg<unknown[]>;
       if (!msg?.success) { setClientIps([]); return; }
-      const arr = Array.isArray(msg.obj) ? msg.obj : [];
-      setClientIps(arr.filter((x): x is string => typeof x === 'string' && x.length > 0));
+      setClientIps(normalizeClientIps(msg.obj));
     } finally {
       setIpsLoading(false);
     }
@@ -276,7 +242,7 @@ export default function ClientInfoModal({
                   <td>
                     <Tag className="info-large-tag">{client.subId || '-'}</Tag>
                     {client.subId && (
-                      <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => copyValue(client.subId!)} />
+                      <Button size="small" type="text" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(client.subId!)} />
                     )}
                   </td>
                 </tr>
@@ -285,7 +251,7 @@ export default function ClientInfoModal({
                     <td>{t('pages.clients.uuid')}</td>
                     <td>
                       <Tag className="info-large-tag">{client.uuid}</Tag>
-                      <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => copyValue(client.uuid!)} />
+                      <Button size="small" type="text" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(client.uuid!)} />
                     </td>
                   </tr>
                 )}
@@ -294,7 +260,7 @@ export default function ClientInfoModal({
                     <td>{t('password')}</td>
                     <td>
                       <Tag className="info-large-tag">{client.password}</Tag>
-                      <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => copyValue(client.password!)} />
+                      <Button size="small" type="text" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(client.password!)} />
                     </td>
                   </tr>
                 )}
@@ -303,7 +269,7 @@ export default function ClientInfoModal({
                     <td>{t('pages.clients.auth')}</td>
                     <td>
                       <Tag className="info-large-tag">{client.auth}</Tag>
-                      <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => copyValue(client.auth!)} />
+                      <Button size="small" type="text" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(client.auth!)} />
                     </td>
                   </tr>
                 )}
@@ -351,7 +317,7 @@ export default function ClientInfoModal({
                 <tr>
                   <td>{t('pages.inbounds.IPLimitlog')}</td>
                   <td>
-                    <Button size="small" icon={<EyeOutlined />} loading={ipsLoading} onClick={openIpsModal}>
+                    <Button size="small" icon={<EyeOutlined />} aria-label={t('pages.clients.ipLog')} loading={ipsLoading} onClick={openIpsModal}>
                       {clientIps.length > 0 ? clientIps.length : ''}
                     </Button>
                   </td>
@@ -364,6 +330,12 @@ export default function ClientInfoModal({
                   <td>{t('pages.inbounds.updatedAt')}</td>
                   <td><Tag>{dateLabel(client.updatedAt)}</Tag></td>
                 </tr>
+                {client.group && (
+                  <tr>
+                    <td>{t('pages.clients.group')}</td>
+                    <td><Tag color="geekblue">{client.group}</Tag></td>
+                  </tr>
+                )}
                 {client.comment && (
                   <tr>
                     <td>{t('pages.clients.comment')}</td>
@@ -382,7 +354,7 @@ export default function ClientInfoModal({
                         const ib = inboundsById[id];
                         const proto = (ib?.protocol || '').toLowerCase();
                         const color = INBOUND_PROTOCOL_COLORS[proto] ?? 'default';
-                        const label = ib?.tag ?? '';
+                        const label = formatInboundLabel(ib?.tag, ib?.remark);
                         return (
                           <Tooltip key={id} title={label}>
                             <Tag color={color}>{label}</Tag>
@@ -415,46 +387,6 @@ export default function ClientInfoModal({
               </tbody>
             </table>
 
-            {links.length > 0 && (
-              <>
-                <Divider>{t('pages.inbounds.copyLink')}</Divider>
-                {links.map((link, idx) => {
-                  const meta = parseLinkMeta(link);
-                  const rowTitle = trimEmail(meta.remark, client.email)
-                    || `${t('pages.clients.link')} ${idx + 1}`;
-                  const qrRemark = client.email
-                    ? `${rowTitle}-${client.email}`
-                    : (meta.remark || `${t('pages.clients.link')} ${idx + 1}`);
-                  const canQr = !isPostQuantumLink(link);
-                  return (
-                    <div key={idx} className="link-row">
-                      <Tag color={PROTOCOL_COLORS[meta.protocol] ?? 'default'} className="link-row-tag">
-                        {meta.protocol}
-                      </Tag>
-                      <span className="link-row-title" title={qrRemark}>{rowTitle}</span>
-                      <div className="link-row-actions">
-                        <Tooltip title={t('copy')}>
-                          <Button size="small" icon={<CopyOutlined />} onClick={() => copyValue(link)} />
-                        </Tooltip>
-                        {canQr && (
-                          <Popover
-                            trigger="click"
-                            placement="left"
-                            destroyOnHidden
-                            content={<QrPanel value={link} remark={qrRemark} size={220} />}
-                          >
-                            <Tooltip title={t('pages.clients.qrCode')}>
-                              <Button size="small" icon={<QrcodeOutlined />} />
-                            </Tooltip>
-                          </Popover>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-
             {showSubscription && subLink && (
               <>
                 <Divider>{t('subscription.title')}</Divider>
@@ -471,7 +403,10 @@ export default function ClientInfoModal({
                   </a>
                   <div className="link-row-actions">
                     <Tooltip title={t('copy')}>
-                      <Button size="small" icon={<CopyOutlined />} onClick={() => copyValue(subLink)} />
+                      <Button size="small" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(subLink)} />
+                    </Tooltip>
+                    <Tooltip title={t('download')}>
+                      <Button size="small" icon={<DownloadOutlined />} aria-label={t('download')} loading={downloadingFormat === 'standard'} disabled={downloadingFormat !== null} onClick={() => void downloadSubscription(subLink, 'standard')} />
                     </Tooltip>
                     <Popover
                       trigger="click"
@@ -480,7 +415,7 @@ export default function ClientInfoModal({
                       content={<QrPanel value={subLink} remark={`${client.email} — ${t('subscription.title')}`} size={220} />}
                     >
                       <Tooltip title={t('pages.clients.qrCode')}>
-                        <Button size="small" icon={<QrcodeOutlined />} />
+                        <Button size="small" icon={<QrcodeOutlined />} aria-label={t('pages.clients.qrCode')} />
                       </Tooltip>
                     </Popover>
                   </div>
@@ -499,7 +434,10 @@ export default function ClientInfoModal({
                     </a>
                     <div className="link-row-actions">
                       <Tooltip title={t('copy')}>
-                        <Button size="small" icon={<CopyOutlined />} onClick={() => copyValue(subJsonLink)} />
+                        <Button size="small" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(subJsonLink)} />
+                      </Tooltip>
+                      <Tooltip title={t('download')}>
+                        <Button size="small" icon={<DownloadOutlined />} aria-label={t('download')} loading={downloadingFormat === 'json'} disabled={downloadingFormat !== null} onClick={() => void downloadSubscription(subJsonLink, 'json')} />
                       </Tooltip>
                       <Popover
                         trigger="click"
@@ -508,7 +446,7 @@ export default function ClientInfoModal({
                         content={<QrPanel value={subJsonLink} remark={`${client.email} — JSON`} size={220} />}
                       >
                         <Tooltip title={t('pages.clients.qrCode')}>
-                          <Button size="small" icon={<QrcodeOutlined />} />
+                          <Button size="small" icon={<QrcodeOutlined />} aria-label={t('pages.clients.qrCode')} />
                         </Tooltip>
                       </Popover>
                     </div>
@@ -530,7 +468,10 @@ export default function ClientInfoModal({
                     </a>
                     <div className="link-row-actions">
                       <Tooltip title={t('copy')}>
-                        <Button size="small" icon={<CopyOutlined />} onClick={() => copyValue(subClashLink)} />
+                        <Button size="small" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(subClashLink)} />
+                      </Tooltip>
+                      <Tooltip title={t('download')}>
+                        <Button size="small" icon={<DownloadOutlined />} aria-label={t('download')} loading={downloadingFormat === 'clash'} disabled={downloadingFormat !== null} onClick={() => void downloadSubscription(subClashLink, 'clash')} />
                       </Tooltip>
                       <Popover
                         trigger="click"
@@ -539,12 +480,62 @@ export default function ClientInfoModal({
                         content={<QrPanel value={subClashLink} remark={`${client.email} — Clash / Mihomo`} size={220} />}
                       >
                         <Tooltip title={t('pages.clients.qrCode')}>
-                          <Button size="small" icon={<QrcodeOutlined />} />
+                          <Button size="small" icon={<QrcodeOutlined />} aria-label={t('pages.clients.qrCode')} />
                         </Tooltip>
                       </Popover>
                     </div>
                   </div>
                 )}
+              </>
+            )}
+
+            {links.length > 0 && (
+              <>
+                <Divider>{t('pages.inbounds.copyLink')}</Divider>
+                {links.map((link, idx) => {
+                  const parts = parseLinkParts(link);
+                  const fallback = `${t('pages.clients.link')} ${idx + 1}`;
+                  const rowTitle = (parts && linkMetaText(parts)) || fallback;
+                  const qrRemark = parts?.remark || rowTitle;
+                  const canQr = !isPostQuantumLink(link);
+                  return (
+                    <div key={idx} className="link-row">
+                      {parts
+                        ? <LinkTags parts={parts} />
+                        : <Tag className="link-row-tag">LINK</Tag>}
+                      <span className="link-row-title" title={rowTitle}>{rowTitle}</span>
+                      <div className="link-row-actions">
+                        <Tooltip title={t('copy')}>
+                          <Button size="small" icon={<CopyOutlined />} aria-label={t('copy')} onClick={() => copyValue(link)} />
+                        </Tooltip>
+                        {canQr && (
+                          <Popover
+                            trigger="click"
+                            placement="left"
+                            destroyOnHidden
+                            content={<QrPanel value={link} remark={qrRemark} size={220} />}
+                          >
+                            <Tooltip title={t('pages.clients.qrCode')}>
+                              <Button size="small" icon={<QrcodeOutlined />} aria-label={t('pages.clients.qrCode')} />
+                            </Tooltip>
+                          </Popover>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+
+            {wgConfigText && client && (
+              <>
+                <Divider>{t('pages.clients.wireguardConfig')}</Divider>
+                <ConfigBlock
+                  label={t('pages.clients.config')}
+                  text={wgConfigText}
+                  fileName={`${client.email}.conf`}
+                  qrRemark={client.email || 'peer'}
+                />
               </>
             )}
           </>
@@ -570,7 +561,7 @@ export default function ClientInfoModal({
       >
         {clientIps.length > 0 ? (
           <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-            {clientIps.map((ip, idx) => (
+            {clientIps.map((entry, idx) => (
               <Tag
                 key={idx}
                 color="blue"
@@ -583,7 +574,10 @@ export default function ClientInfoModal({
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                 }}
               >
-                {ip}
+                {entry.ip}{entry.time ? ` (${entry.time})` : ''}
+                {entry.node ? (
+                  <span style={{ marginInlineStart: 6, opacity: 0.85, fontWeight: 600 }}>@ {entry.node}</span>
+                ) : null}
               </Tag>
             ))}
           </div>

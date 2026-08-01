@@ -1,15 +1,23 @@
-import type { InboundFormValues, TrafficReset } from '@/schemas/forms/inbound-form';
+import type { InboundFormValues, ShareAddrStrategy, TrafficReset } from '@/schemas/forms/inbound-form';
 import type { InboundSettings } from '@/schemas/protocols/inbound';
 import {
   HysteriaClientSchema,
+  MtprotoClientSchema,
   ShadowsocksClientSchema,
   TrojanClientSchema,
   VlessClientSchema,
   VmessClientSchema,
+  WireguardClientSchema,
 } from '@/schemas/protocols/inbound';
 import type { StreamSettings } from '@/schemas/api/inbound';
 import type { Sniffing } from '@/schemas/primitives';
 import type { z } from 'zod';
+import { normalizeStreamSettingsForWire } from '@/lib/xray/stream-wire-normalize';
+import { canEnableSniffing } from '@/lib/xray/protocol-capabilities';
+import { SockoptStreamSettingsSchema } from '@/schemas/protocols/stream/sockopt';
+import { XHttpStreamSettingsSchema, XHttpXmuxSchema } from '@/schemas/protocols/stream/xhttp';
+
+const XMUX_DEFAULTS = XHttpXmuxSchema.parse({});
 
 // Plain-data adapter between the panel's stored inbound row shape and
 // the typed InboundFormValues that Form.useForm<T> carries inside
@@ -33,8 +41,12 @@ export interface RawInboundRow {
   enable?: boolean;
   expiryTime?: number;
   trafficReset?: string;
+  trafficResetDay?: number;
   lastTrafficResetTime?: number;
   nodeId?: number | null;
+  shareAddrStrategy?: string;
+  shareAddr?: string;
+  subSortIndex?: number;
   clientStats?: unknown;
 }
 
@@ -49,6 +61,7 @@ export interface WireInboundPayload {
   enable: boolean;
   expiryTime: number;
   trafficReset: TrafficReset;
+  trafficResetDay: number;
   lastTrafficResetTime: number;
   listen: string;
   port: number;
@@ -59,6 +72,9 @@ export interface WireInboundPayload {
   tag: string;
   clientStats?: unknown;
   nodeId?: number;
+  shareAddrStrategy: ShareAddrStrategy;
+  shareAddr: string;
+  subSortIndex: number;
 }
 
 function coerceJsonObject(value: unknown): Record<string, unknown> {
@@ -80,11 +96,18 @@ function coerceJsonObject(value: unknown): Record<string, unknown> {
 }
 
 const TRAFFIC_RESETS: TrafficReset[] = ['never', 'hourly', 'daily', 'weekly', 'monthly'];
+const SHARE_ADDR_STRATEGIES: ShareAddrStrategy[] = ['node', 'listen', 'custom'];
 
 function coerceTrafficReset(v: unknown): TrafficReset {
   return typeof v === 'string' && (TRAFFIC_RESETS as string[]).includes(v)
     ? (v as TrafficReset)
     : 'never';
+}
+
+function coerceShareAddrStrategy(v: unknown): ShareAddrStrategy {
+  return typeof v === 'string' && (SHARE_ADDR_STRATEGIES as string[]).includes(v)
+    ? (v as ShareAddrStrategy)
+    : 'node';
 }
 
 // Network values that map to a required `${network}Settings` key in
@@ -104,6 +127,10 @@ const NETWORK_SETTINGS_KEY: Record<string, string> = {
 };
 
 function healStreamNetworkKey(stream: Record<string, unknown>): void {
+  if (typeof stream.method === 'string' && stream.method !== '') {
+    stream.network = stream.method;
+  }
+  delete stream.method;
   const network = typeof stream.network === 'string' ? stream.network : '';
   const key = NETWORK_SETTINGS_KEY[network];
   if (!key) return;
@@ -142,6 +169,25 @@ export function rawInboundToFormValues(row: RawInboundRow): InboundFormValues {
   if (streamSettings) {
     healStreamNetworkKey(streamSettings as unknown as Record<string, unknown>);
     synthesizeTlsCertUseFile(streamSettings as unknown as Record<string, unknown>);
+    const streamRecord = streamSettings as unknown as Record<string, unknown>;
+    const xh = streamRecord.xhttpSettings;
+    if (xh && typeof xh === 'object' && !Array.isArray(xh)) {
+      const parsed = XHttpStreamSettingsSchema.safeParse(xh);
+      const xhttp = (parsed.success ? parsed.data : xh) as Record<string, unknown>;
+      streamRecord.xhttpSettings = xhttp;
+      const xmux = xhttp.xmux;
+      if (xmux && typeof xmux === 'object' && !Array.isArray(xmux)) {
+        xhttp.enableXmux = true;
+        xhttp.xmux = { ...XMUX_DEFAULTS, ...(xmux as Record<string, unknown>) };
+      }
+    }
+    const so = streamRecord.sockopt;
+    if (so && typeof so === 'object' && !Array.isArray(so)) {
+      const parsed = SockoptStreamSettingsSchema.safeParse(so);
+      if (parsed.success) {
+        streamRecord.sockopt = { ...(so as Record<string, unknown>), ...parsed.data };
+      }
+    }
   }
   const sniffing = coerceJsonObject(row.sniffing) as unknown as Sniffing;
 
@@ -158,8 +204,12 @@ export function rawInboundToFormValues(row: RawInboundRow): InboundFormValues {
     down: row.down ?? 0,
     total: row.total ?? 0,
     trafficReset: coerceTrafficReset(row.trafficReset),
+    trafficResetDay: Math.min(31, Math.max(1, row.trafficResetDay ?? 1)),
     lastTrafficResetTime: row.lastTrafficResetTime ?? 0,
     nodeId: row.nodeId ?? null,
+    shareAddrStrategy: coerceShareAddrStrategy(row.shareAddrStrategy),
+    shareAddr: row.shareAddr ?? '',
+    subSortIndex: Math.max(1, row.subSortIndex ?? 1),
     protocol,
     settings,
   } as InboundFormValues;
@@ -203,6 +253,8 @@ function clientSchemaForProtocol(protocol: string): z.ZodType | null {
     case 'trojan': return TrojanClientSchema;
     case 'shadowsocks': return ShadowsocksClientSchema;
     case 'hysteria': return HysteriaClientSchema;
+    case 'wireguard': return WireguardClientSchema;
+    case 'mtproto': return MtprotoClientSchema;
     default: return null;
   }
 }
@@ -279,10 +331,13 @@ export function formValuesToWirePayload(values: InboundFormValues): WireInboundP
   if (Array.isArray(settingsPruned.clients)) {
     settingsPruned.clients = normalizeClients(values.protocol, settingsPruned.clients);
   }
-  const streamPruned = values.streamSettings
+  let streamPruned = values.streamSettings
     ? ((pruneEmpty(values.streamSettings) ?? {}) as Record<string, unknown>)
     : undefined;
-  if (streamPruned) stripTlsCertUseFile(streamPruned);
+  if (streamPruned) {
+    streamPruned = normalizeStreamSettingsForWire(streamPruned, { side: 'inbound' });
+    stripTlsCertUseFile(streamPruned);
+  }
   dropLegacyOptionalEmpties(settingsPruned, streamPruned);
   const payload: WireInboundPayload = {
     up: values.up,
@@ -292,14 +347,20 @@ export function formValuesToWirePayload(values: InboundFormValues): WireInboundP
     enable: values.enable,
     expiryTime: values.expiryTime,
     trafficReset: values.trafficReset,
+    trafficResetDay: values.trafficResetDay,
     lastTrafficResetTime: values.lastTrafficResetTime,
     listen: values.listen,
     port: values.port,
     protocol: values.protocol,
     settings: JSON.stringify(settingsPruned),
     streamSettings: streamPruned ? JSON.stringify(streamPruned) : '',
-    sniffing: JSON.stringify(normalizeSniffing(values.sniffing)),
+    // mtproto is mtg-served, not Xray, so sniffing never applies — emit empty
+    // rather than the default { enabled: false } so the row carries no sniffing.
+    sniffing: canEnableSniffing({ protocol: values.protocol }) ? JSON.stringify(normalizeSniffing(values.sniffing)) : '',
     tag: values.tag,
+    shareAddrStrategy: values.shareAddrStrategy,
+    shareAddr: values.shareAddr,
+    subSortIndex: values.subSortIndex,
   };
   if (values.nodeId != null) payload.nodeId = values.nodeId;
   return payload;

@@ -1,17 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Collapse,
   Input,
   InputNumber,
   Select,
-  Space,
   Switch,
+  Tabs,
 } from 'antd';
+import {
+  ApartmentOutlined,
+  BellOutlined,
+  ClockCircleOutlined,
+  GlobalOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import type { AllSetting } from '@/models/setting';
 import { HttpUtil, LanguageManager } from '@/utils';
-import { SettingListItem } from '@/components/ui';
+import { onNumber } from '@/utils/onNumber';
+import { DefaultSettingTag, SettingListItem } from '@/components/ui';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { catTabLabel } from './catTabLabel';
 import { sanitizePath } from './uriPath';
+import SecretInput from './SecretInput';
 
 interface ApiMsg<T = unknown> {
   success?: boolean;
@@ -23,8 +34,6 @@ interface GeneralTabProps {
   updateSetting: (patch: Partial<AllSetting>) => void;
 }
 
-const REMARK_MODELS: Record<string, string> = { i: 'Inbound', e: 'Email', o: 'Other' };
-const REMARK_SEPARATORS = [' ', '-', '_', '@', ':', '~', '|', ',', '.', '/'];
 const DATEPICKER_LIST: { name: string; value: 'gregorian' | 'jalalian' }[] = [
   { name: 'Gregorian (Standard)', value: 'gregorian' },
   { name: 'Jalalian (شمسی)', value: 'jalalian' },
@@ -32,9 +41,12 @@ const DATEPICKER_LIST: { name: string; value: 'gregorian' | 'jalalian' }[] = [
 
 export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProps) {
   const { t } = useTranslation();
+  const { isMobile } = useMediaQuery();
 
   const [lang, setLang] = useState<string>(() => LanguageManager.getLanguage());
   const [inboundOptions, setInboundOptions] = useState<{ label: string; value: string }[]>([]);
+  const [outboundTagList, setOutboundTagList] = useState<string[]>([]);
+  const [balancerTagList, setBalancerTagList] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,29 +69,63 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
     return () => { cancelled = true; };
   }, []);
 
-  const remarkModel = useMemo(() => {
-    const rm = allSetting.remarkModel || '';
-    return rm.length > 1 ? rm.substring(1).split('') : [];
-  }, [allSetting.remarkModel]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      // Candidates for the panel egress picker: template outbounds plus
+      // subscription-derived outbounds, and routing balancers. The panel egress
+      // is injected as a routing rule, so a balancer tag is a valid target
+      // (it load-balances the panel's own traffic). The geodata picker, by
+      // contrast, dials a forced tag and can only use a concrete outbound.
+      const msg = await HttpUtil.post('/panel/api/xray/', undefined, { silent: true }) as ApiMsg<string>;
+      if (cancelled || !msg?.success || typeof msg.obj !== 'string') return;
+      try {
+        const payload = JSON.parse(msg.obj) as Record<string, unknown>;
+        const template = (payload.xraySetting || {}) as Record<string, unknown>;
+        const tags = new Set<string>();
+        const outbounds = Array.isArray(template.outbounds) ? template.outbounds : [];
+        for (const o of outbounds) {
+          if (!o || typeof o !== 'object') continue;
+          const rec = o as Record<string, unknown>;
+          if (rec.protocol === 'blackhole') continue; // dropping traffic is never a useful egress
+          const tag = rec.tag;
+          if (typeof tag === 'string' && tag) tags.add(tag);
+        }
+        const subTags = Array.isArray(payload.subscriptionOutboundTags) ? payload.subscriptionOutboundTags : [];
+        for (const tag of subTags) {
+          if (typeof tag === 'string' && tag) tags.add(tag);
+        }
+        const balancerTags: string[] = [];
+        const routing = (template.routing || {}) as Record<string, unknown>;
+        const balancers = Array.isArray(routing.balancers) ? routing.balancers : [];
+        for (const b of balancers) {
+          if (!b || typeof b !== 'object') continue;
+          const tag = (b as Record<string, unknown>).tag;
+          if (typeof tag === 'string' && tag && !tags.has(tag)) balancerTags.push(tag);
+        }
+        setOutboundTagList([...tags]);
+        setBalancerTagList(balancerTags);
+      } catch {
+        setOutboundTagList([]);
+        setBalancerTagList([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-  const remarkSeparator = useMemo(() => {
-    const rm = allSetting.remarkModel || '-';
-    return rm.length > 1 ? rm.charAt(0) : '-';
-  }, [allSetting.remarkModel]);
-
-  const remarkSample = useMemo(() => {
-    const parts = remarkModel.map((k) => REMARK_MODELS[k]);
-    return parts.length === 0 ? '' : parts.join(remarkSeparator);
-  }, [remarkModel, remarkSeparator]);
-
-  function setRemarkModel(parts: string[]) {
-    updateSetting({ remarkModel: remarkSeparator + parts.join('') });
-  }
-
-  function setRemarkSeparator(sep: string) {
-    const tail = (allSetting.remarkModel || '-').substring(1);
-    updateSetting({ remarkModel: sep + tail });
-  }
+  // Outbound tags and balancer tags share one picker. When balancers exist they
+  // get their own labeled group so it's clear the selection routes through a
+  // balancer rather than a single outbound.
+  const outboundOptions = useMemo<
+    ({ label: string; value: string } | { label: string; options: { label: string; value: string }[] })[]
+  >(() => {
+    const outOpts = outboundTagList.map((tag) => ({ label: tag, value: tag }));
+    if (balancerTagList.length === 0) return outOpts;
+    return [
+      { label: t('pages.xray.Outbounds'), options: outOpts },
+      { label: t('pages.xray.Balancers'), options: balancerTagList.map((tag) => ({ label: tag, value: tag })) },
+    ];
+  }, [outboundTagList, balancerTagList, t]);
 
   const ldapInboundTagList = useMemo(() => {
     const csv = allSetting.ldapInboundTags || '';
@@ -109,34 +155,12 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
   );
 
   return (
-    <Collapse defaultActiveKey="1" items={[
+    <Tabs defaultActiveKey="1" items={[
       {
         key: '1',
-        label: t('pages.settings.panelSettings'),
+        label: catTabLabel(<SettingOutlined />, t('pages.settings.panelSettings'), isMobile),
         children: (
           <>
-            <SettingListItem
-              paddings="small"
-              title={t('pages.settings.remarkModel')}
-              description={<>{t('pages.settings.sampleRemark')}: <i>#{remarkSample}</i></>}
-            >
-              <Space.Compact style={{ width: '100%' }}>
-                <Select
-                  mode="multiple"
-                  value={remarkModel}
-                  onChange={setRemarkModel}
-                  style={{ paddingRight: '.5rem', minWidth: '80%', width: 'auto' }}
-                  options={Object.entries(REMARK_MODELS).map(([k, l]) => ({ value: k, label: l }))}
-                />
-                <Select
-                  value={remarkSeparator}
-                  onChange={setRemarkSeparator}
-                  style={{ width: '20%' }}
-                  options={REMARK_SEPARATORS.map((s) => ({ value: s, label: s }))}
-                />
-              </Space.Compact>
-            </SettingListItem>
-
             <SettingListItem paddings="small" title={t('pages.settings.panelListeningIP')} description={t('pages.settings.panelListeningIPDesc')}>
               <Input value={allSetting.webListen} onChange={(e) => updateSetting({ webListen: e.target.value })} />
             </SettingListItem>
@@ -145,18 +169,18 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
               <Input value={allSetting.webDomain} onChange={(e) => updateSetting({ webDomain: e.target.value })} />
             </SettingListItem>
 
-            <SettingListItem paddings="small" title={t('pages.settings.panelPort')} description={t('pages.settings.panelPortDesc')}>
+            <SettingListItem paddings="small" title={t('pages.settings.panelPort')} badge={<DefaultSettingTag settingKey="webPort" value={allSetting.webPort} />} description={t('pages.settings.panelPortDesc')}>
               <InputNumber value={allSetting.webPort} min={1} max={65535} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ webPort: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ webPort: v }))} />
             </SettingListItem>
 
             <SettingListItem paddings="small" title={t('pages.settings.panelUrlPath')} description={t('pages.settings.panelUrlPathDesc')}>
               <Input value={allSetting.webBasePath} onChange={(e) => updateSetting({ webBasePath: sanitizePath(e.target.value) })} />
             </SettingListItem>
 
-            <SettingListItem paddings="small" title={t('pages.settings.sessionMaxAge')} description={t('pages.settings.sessionMaxAgeDesc')}>
+            <SettingListItem paddings="small" title={t('pages.settings.sessionMaxAge')} badge={<DefaultSettingTag settingKey="sessionMaxAge" value={allSetting.sessionMaxAge} />} description={t('pages.settings.sessionMaxAgeDesc')}>
               <InputNumber value={allSetting.sessionMaxAge} min={60} max={525600} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ sessionMaxAge: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ sessionMaxAge: v }))} />
             </SettingListItem>
 
             <SettingListItem
@@ -171,17 +195,26 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
               />
             </SettingListItem>
 
-            <SettingListItem paddings="small" title={t('pages.settings.panelProxy')} description={t('pages.settings.panelProxyDesc')}>
-              <Input
-                value={allSetting.panelProxy}
-                placeholder="socks5:// or http://user:pass@host:port"
-                onChange={(e) => updateSetting({ panelProxy: e.target.value })}
+            <SettingListItem paddings="small" title={t('pages.settings.panelOutbound')} description={t('pages.settings.panelOutboundDesc')}>
+              <Select
+                style={{ width: '100%' }}
+                allowClear
+                showSearch
+                value={allSetting.panelOutbound || undefined}
+                placeholder={t('pages.settings.panelOutboundPh')}
+                options={outboundOptions}
+                onChange={(v) => updateSetting({ panelOutbound: (v as string | undefined) || '' })}
               />
             </SettingListItem>
 
-            <SettingListItem paddings="small" title={t('pages.settings.pageSize')} description={t('pages.settings.pageSizeDesc')}>
-              <InputNumber value={allSetting.pageSize} min={1} max={1000} step={5} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ pageSize: Number(v) || 0 })} />
+            <SettingListItem paddings="small" title={t('pages.settings.pageSize')} badge={<DefaultSettingTag settingKey="pageSize" value={allSetting.pageSize} />} description={t('pages.settings.pageSizeDesc')}>
+              <InputNumber value={allSetting.pageSize} min={0} max={1000} step={5} style={{ width: '100%' }}
+                onChange={onNumber((v) => updateSetting({ pageSize: v }))} />
+            </SettingListItem>
+
+            <SettingListItem paddings="small" title={t('pages.settings.restartXrayOnClientDisable')} description={t('pages.settings.restartXrayOnClientDisableDesc')}>
+              <Switch checked={allSetting.restartXrayOnClientDisable}
+                onChange={(v) => updateSetting({ restartXrayOnClientDisable: v })} />
             </SettingListItem>
 
             <SettingListItem paddings="small" title={t('pages.settings.language')}>
@@ -197,23 +230,23 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
       },
       {
         key: '2',
-        label: t('pages.settings.notifications'),
+        label: catTabLabel(<BellOutlined />, t('pages.settings.notifications'), isMobile),
         children: (
           <>
-            <SettingListItem paddings="small" title={t('pages.settings.expireTimeDiff')} description={t('pages.settings.expireTimeDiffDesc')}>
+            <SettingListItem paddings="small" title={t('pages.settings.expireTimeDiff')} badge={<DefaultSettingTag settingKey="expireDiff" value={allSetting.expireDiff} />} description={t('pages.settings.expireTimeDiffDesc')}>
               <InputNumber value={allSetting.expireDiff} min={0} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ expireDiff: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ expireDiff: v }))} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.trafficDiff')} description={t('pages.settings.trafficDiffDesc')}>
+            <SettingListItem paddings="small" title={t('pages.settings.trafficDiff')} badge={<DefaultSettingTag settingKey="trafficDiff" value={allSetting.trafficDiff} />} description={t('pages.settings.trafficDiffDesc')}>
               <InputNumber value={allSetting.trafficDiff} min={0} max={100} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ trafficDiff: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ trafficDiff: v }))} />
             </SettingListItem>
           </>
         ),
       },
       {
         key: '3',
-        label: t('pages.settings.certs'),
+        label: catTabLabel(<SafetyCertificateOutlined />, t('pages.settings.certs'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.publicKeyPath')} description={t('pages.settings.publicKeyPathDesc')}>
@@ -227,7 +260,7 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
       },
       {
         key: '4',
-        label: t('pages.settings.externalTraffic'),
+        label: catTabLabel(<GlobalOutlined />, t('pages.settings.externalTraffic'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.externalTrafficInformEnable')} description={t('pages.settings.externalTrafficInformEnableDesc')}>
@@ -241,16 +274,12 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
                 onChange={(e) => updateSetting({ externalTrafficInformURI: e.target.value })}
               />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.restartXrayOnClientDisable')} description={t('pages.settings.restartXrayOnClientDisableDesc')}>
-              <Switch checked={allSetting.restartXrayOnClientDisable}
-                onChange={(v) => updateSetting({ restartXrayOnClientDisable: v })} />
-            </SettingListItem>
           </>
         ),
       },
       {
         key: '5',
-        label: t('pages.settings.dateAndTime'),
+        label: catTabLabel(<ClockCircleOutlined />, t('pages.settings.dateAndTime'), isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.timeZone')} description={t('pages.settings.timeZoneDesc')}>
@@ -269,7 +298,7 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
       },
       {
         key: '6',
-        label: 'LDAP',
+        label: catTabLabel(<ApartmentOutlined />, 'LDAP', isMobile),
         children: (
           <>
             <SettingListItem paddings="small" title={t('pages.settings.ldap.enable')}>
@@ -278,12 +307,23 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
             <SettingListItem paddings="small" title={t('pages.settings.ldap.host')}>
               <Input value={allSetting.ldapHost} onChange={(e) => updateSetting({ ldapHost: e.target.value })} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.ldap.port')}>
+            <SettingListItem paddings="small" title={t('pages.settings.ldap.port')} badge={<DefaultSettingTag settingKey="ldapPort" value={allSetting.ldapPort} />}>
               <InputNumber value={allSetting.ldapPort} min={1} max={65535} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ ldapPort: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ ldapPort: v }))} />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.ldap.useTls')}>
               <Switch checked={allSetting.ldapUseTLS} onChange={(v) => updateSetting({ ldapUseTLS: v })} />
+            </SettingListItem>
+            <SettingListItem
+              paddings="small"
+              title={t('pages.settings.ldap.skipTlsVerify')}
+              description={t('pages.settings.ldap.skipTlsVerifyDesc')}
+            >
+              <Switch
+                checked={allSetting.ldapInsecureSkipVerify}
+                disabled={!allSetting.ldapUseTLS}
+                onChange={(v) => updateSetting({ ldapInsecureSkipVerify: v })}
+              />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.ldap.bindDn')}>
               <Input value={allSetting.ldapBindDN} onChange={(e) => updateSetting({ ldapBindDN: e.target.value })} />
@@ -291,12 +331,15 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
             <SettingListItem
               paddings="small"
               title={t('password')}
-              description={allSetting.hasLdapPassword ? t('pages.settings.ldap.passwordConfigured') : t('pages.settings.ldap.passwordUnconfigured')}
+              description={allSetting.hasLdapPassword && !allSetting.clearLdapPassword ? t('pages.settings.ldap.passwordConfigured') : t('pages.settings.ldap.passwordUnconfigured')}
             >
-              <Input.Password
+              <SecretInput
                 value={allSetting.ldapPassword}
-                placeholder={allSetting.hasLdapPassword ? t('pages.settings.ldap.passwordPlaceholder') : ''}
-                onChange={(e) => updateSetting({ ldapPassword: e.target.value })}
+                configured={allSetting.hasLdapPassword}
+                clearArmed={allSetting.clearLdapPassword}
+                placeholder={t('pages.settings.ldap.passwordPlaceholder')}
+                onChange={(v) => updateSetting({ ldapPassword: v })}
+                onClearArmedChange={(armed) => updateSetting({ clearLdapPassword: armed })}
               />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.ldap.baseDn')}>
@@ -343,17 +386,17 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
             <SettingListItem paddings="small" title={t('pages.settings.ldap.autoDelete')}>
               <Switch checked={allSetting.ldapAutoDelete} onChange={(v) => updateSetting({ ldapAutoDelete: v })} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.ldap.defaultTotalGb')}>
+            <SettingListItem paddings="small" title={t('pages.settings.ldap.defaultTotalGb')} badge={<DefaultSettingTag settingKey="ldapDefaultTotalGB" value={allSetting.ldapDefaultTotalGB} />}>
               <InputNumber value={allSetting.ldapDefaultTotalGB} min={0} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ ldapDefaultTotalGB: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ ldapDefaultTotalGB: v }))} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.ldap.defaultExpiryDays')}>
+            <SettingListItem paddings="small" title={t('pages.settings.ldap.defaultExpiryDays')} badge={<DefaultSettingTag settingKey="ldapDefaultExpiryDays" value={allSetting.ldapDefaultExpiryDays} />}>
               <InputNumber value={allSetting.ldapDefaultExpiryDays} min={0} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ ldapDefaultExpiryDays: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ ldapDefaultExpiryDays: v }))} />
             </SettingListItem>
-            <SettingListItem paddings="small" title={t('pages.settings.ldap.defaultIpLimit')}>
+            <SettingListItem paddings="small" title={t('pages.settings.ldap.defaultIpLimit')} badge={<DefaultSettingTag settingKey="ldapDefaultLimitIP" value={allSetting.ldapDefaultLimitIP} />}>
               <InputNumber value={allSetting.ldapDefaultLimitIP} min={0} style={{ width: '100%' }}
-                onChange={(v) => updateSetting({ ldapDefaultLimitIP: Number(v) || 0 })} />
+                onChange={onNumber((v) => updateSetting({ ldapDefaultLimitIP: v }))} />
             </SettingListItem>
           </>
         ),

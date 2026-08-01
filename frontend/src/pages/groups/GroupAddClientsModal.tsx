@@ -50,7 +50,7 @@ export default function GroupAddClientsModal({
     if (!open) return;
     setSelectedEmails([]);
     setSearch('');
-  }, [open, rows]);
+  }, [open]);
 
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -122,7 +122,7 @@ export default function GroupAddClientsModal({
         {t('pages.groups.addToGroupDesc')}
       </Typography.Paragraph>
 
-      <Space direction="vertical" size="small" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="small" style={{ width: '100%' }}>
         <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
           <Input.Search
             allowClear
@@ -139,7 +139,7 @@ export default function GroupAddClientsModal({
           </Typography.Text>
         </Space>
         {rows.length === 0 ? (
-          <Alert type="info" showIcon message={t('pages.groups.addToGroupEmpty')} />
+          <Alert type="info" showIcon title={t('pages.groups.addToGroupEmpty')} />
         ) : (
           <Table<ClientRow>
             size="small"
