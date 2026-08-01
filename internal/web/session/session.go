@@ -1,4 +1,4 @@
-package session
+﻿package session
 
 import (
 	"encoding/gob"
@@ -10,9 +10,9 @@ import (
 	"github.com/kolxz2/3x-ui/v3/database/model"
 	"github.com/kolxz2/3x-ui/v3/logger"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 >>>>>>> upstream/main:internal/web/session/session.go
 
 	"github.com/gin-contrib/sessions"

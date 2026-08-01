@@ -1,4 +1,4 @@
-package middleware
+﻿package middleware
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 <<<<<<< HEAD:web/middleware/validate.go
 	"github.com/kolxz2/3x-ui/v3/web/entity"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
+	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
 >>>>>>> upstream/main:internal/web/middleware/validate.go
 )
 

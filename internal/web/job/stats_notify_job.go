@@ -1,11 +1,11 @@
-package job
+﻿package job
 
 import (
 <<<<<<< HEAD:web/job/stats_notify_job.go
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/tgbot"
 >>>>>>> upstream/main:internal/web/job/stats_notify_job.go
 )
 

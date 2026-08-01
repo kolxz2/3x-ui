@@ -1,4 +1,4 @@
-package controller
+﻿package controller
 
 import (
 	"bytes"
@@ -16,9 +16,9 @@ import (
 	"github.com/kolxz2/3x-ui/v3/logger"
 	"github.com/kolxz2/3x-ui/v3/web/session"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/web/session"
 >>>>>>> upstream/main:internal/web/controller/dist.go
 )
 

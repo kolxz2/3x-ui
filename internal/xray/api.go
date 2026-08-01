@@ -1,4 +1,4 @@
-// Package xray provides integration with the Xray proxy core.
+﻿// Package xray provides integration with the Xray proxy core.
 // It includes API client functionality, configuration management, traffic monitoring,
 // and process control for Xray instances.
 package xray
@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 
 	"github.com/xtls/xray-core/app/proxyman/command"
 	routerService "github.com/xtls/xray-core/app/router/command"

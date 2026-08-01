@@ -1,4 +1,4 @@
-package job
+﻿package job
 
 import (
 	"io"
@@ -9,8 +9,8 @@ import (
 	"github.com/kolxz2/3x-ui/v3/logger"
 	"github.com/kolxz2/3x-ui/v3/xray"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 >>>>>>> upstream/main:internal/web/job/clear_logs_job.go
 )
 

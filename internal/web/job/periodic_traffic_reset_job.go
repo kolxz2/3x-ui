@@ -1,4 +1,4 @@
-package job
+﻿package job
 
 import (
 <<<<<<< HEAD:web/job/periodic_traffic_reset_job.go
@@ -7,8 +7,8 @@ import (
 =======
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 >>>>>>> upstream/main:internal/web/job/periodic_traffic_reset_job.go
 )
 

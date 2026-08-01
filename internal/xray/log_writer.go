@@ -1,4 +1,4 @@
-package xray
+﻿package xray
 
 import (
 	"regexp"
@@ -9,7 +9,7 @@ import (
 <<<<<<< HEAD:xray/log_writer.go
 	"github.com/kolxz2/3x-ui/v3/logger"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 // Compiled once at package load: Write runs on every line Xray emits, so

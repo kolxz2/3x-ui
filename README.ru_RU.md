@@ -1,4 +1,4 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+﻿[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
 
 <p align="center">
   <picture>
@@ -17,7 +17,7 @@
   <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
   <a href="https://goreportcard.com/report/github.com/kolxz2/3x-ui/v3"><img src="https://goreportcard.com/badge/github.com/kolxz2/3x-ui/v3" alt="Go Report Card"></a>
 =======
-  <a href="https://pkg.go.dev/github.com/mhsanaei/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/mhsanaei/3x-ui/v3.svg" alt="Go Reference"></a>
+  <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
 >>>>>>> upstream/main
 </p>
 
@@ -80,13 +80,13 @@ bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh
 Чтобы установить конкретную версию, добавьте её тег (например, `v3.4.0`):
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.4.0
+bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh) v3.4.0
 ```
 
 Чтобы установить скользящую **dev**-сборку (новейший предварительный релиз по каждому коммиту из ветки `main`, а не стабильный релиз), передайте `dev-latest`:
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
+bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh) dev-latest
 ```
 
 Во время установки генерируются случайные имя пользователя, пароль и путь доступа. После установки выполните `x-ui`, чтобы открыть меню управления, где можно запускать/останавливать сервис, просматривать или сбрасывать учётные данные для входа, управлять SSL-сертификатами и многое другое.
@@ -247,7 +247,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## Форк: обновление и релизы
 
-Этот репозиторий — форк [MHSanaei/3x-ui](https://github.com/MHSanaei/3x-ui). Ниже — как подтянуть изменения из оригинала и как публиковать сборки через GitHub Actions ([`release.yml`](/.github/workflows/release.yml)) для **вашего форка** (`kolxz2/3x-ui`).
+Этот репозиторий — форк [MHSanaei/3x-ui](https://github.com/kolxz2/3x-ui). Ниже — как подтянуть изменения из оригинала и как публиковать сборки через GitHub Actions ([`release.yml`](/.github/workflows/release.yml)) для **вашего форка** (`kolxz2/3x-ui`).
 
 ### Обновить форк из upstream
 
@@ -260,7 +260,7 @@ git remote -v
 Если `upstream` ещё нет, добавьте оригинальный репозиторий:
 
 ```bash
-git remote add upstream https://github.com/MHSanaei/3x-ui.git
+git remote add upstream https://github.com/kolxz2/3x-ui.git
 ```
 
 Проверьте:
@@ -274,8 +274,8 @@ git remote -v
 ```text
 origin    https://github.com/kolxz2/3x-ui.git (fetch)
 origin    https://github.com/kolxz2/3x-ui.git (push)
-upstream  https://github.com/MHSanaei/3x-ui.git (fetch)
-upstream  https://github.com/MHSanaei/3x-ui.git (push)
+upstream  https://github.com/kolxz2/3x-ui.git (fetch)
+upstream  https://github.com/kolxz2/3x-ui.git (push)
 ```
 
 Загрузите последние изменения из оригинала:
@@ -310,25 +310,27 @@ git push origin main
 
 Если `main` уже был на GitHub, после rebase может понадобиться `git push --force-with-lease origin main` — используйте это только когда намеренно переписываете историю на remote.
 
+Код upstream лежит в `internal/` (не в старых каталогах `web/`, `database/`, `xray/`). Файл версии: [`internal/config/version`](internal/config/version).
+
 ### Опубликовать релиз с бинарниками
 
 **Создавать Release вручную в интерфейсе GitHub не обязательно.** Workflow **Release 3X-UI** собирает архивы для Linux/Windows и прикрепляет их к релизу после **push тега версии**.
 
-1. Обновите версию в [`config/version`](config/version) и закоммитьте изменения.
+1. Обновите версию в [`internal/config/version`](internal/config/version) (должна совпадать с тегом, **без** префикса `v`) и закоммитьте изменения.
 2. Отправьте на форк:
 
    ```bash
    git push origin main
    ```
 
-3. Создайте и запушьте тег с префиксом **`v`** (это требование workflow), например `v3.2.6.2`:
+3. Создайте и запушьте тег с префиксом **`v`** (это требование workflow), например `v3.6.0`:
 
    ```bash
-   git tag v3.2.6.2
-   git push origin v3.2.6.2
+   git tag v3.6.0
+   git push origin v3.6.0
    ```
 
-   Теги вида `3.2.6.2` **без** `v` **не** загрузят файлы в [Releases](https://github.com/kolxz2/3x-ui/releases).
+   Теги вида `3.6.0` **без** `v` **не** загрузят файлы в [Releases](https://github.com/kolxz2/3x-ui/releases).
 
 4. Дождитесь завершения workflow во вкладке [Actions](https://github.com/kolxz2/3x-ui/actions) (~10–15 минут). Затем откройте **Releases** — там должны появиться `x-ui-linux-amd64.tar.gz`, `x-ui-windows-amd64.zip` и другие платформы.
 

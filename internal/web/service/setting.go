@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	_ "embed"
@@ -29,16 +29,16 @@ import (
 	"github.com/xlzd/gotp"
 	"gorm.io/gorm"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/netproxy"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/random"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/reflect_util"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	"github.com/kolxz2/3x-ui/v3/internal/util/netproxy"
+	"github.com/kolxz2/3x-ui/v3/internal/util/random"
+	"github.com/kolxz2/3x-ui/v3/internal/util/reflect_util"
+	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 >>>>>>> upstream/main:internal/web/service/setting.go
 )
 

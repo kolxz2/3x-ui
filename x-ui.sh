@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -166,7 +166,7 @@ update_dev() {
     fi
     # XUI_UPDATE_TAG tells update.sh to install the dev-latest pre-release
     # instead of the latest stable tag.
-    XUI_UPDATE_TAG="dev-latest" bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/main/update.sh)
+    XUI_UPDATE_TAG="dev-latest" bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/main/update.sh)
     if [[ $? == 0 ]]; then
         LOGI "Dev update is complete, Panel has automatically restarted "
         before_show_menu
@@ -226,7 +226,7 @@ update_menu() {
 
     if [[ $? == 0 ]]; then
 =======
-    if replace_xui_script "https://raw.githubusercontent.com/MHSanaei/3x-ui/main/x-ui.sh" "false"; then
+    if replace_xui_script "https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh" "false"; then
         chmod +x ${xui_folder}/x-ui.sh
 >>>>>>> upstream/main
         echo -e "${green}Update successful. The panel has automatically restarted.${plain}"
@@ -850,7 +850,7 @@ update_shell() {
         echo ""
         LOGE "Failed to download script, Please check whether the machine can connect Github"
 =======
-    if replace_xui_script "https://github.com/MHSanaei/3x-ui/raw/main/x-ui.sh" "true"; then
+    if replace_xui_script "https://github.com/kolxz2/3x-ui/raw/main/x-ui.sh" "true"; then
         LOGI "Upgrade script succeeded, Please rerun the script"
 >>>>>>> upstream/main
         before_show_menu

@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 <<<<<<< HEAD:web/service/xray_metrics.go
 	"github.com/kolxz2/3x-ui/v3/logger"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/eventbus"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 >>>>>>> upstream/main:internal/web/service/xray_metrics.go
 )
 

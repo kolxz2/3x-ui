@@ -1,4 +1,4 @@
-package runtime
+﻿package runtime
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 <<<<<<< HEAD:web/runtime/runtime.go
 	"github.com/kolxz2/3x-ui/v3/database/model"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 >>>>>>> upstream/main:internal/web/runtime/runtime.go
 )
 

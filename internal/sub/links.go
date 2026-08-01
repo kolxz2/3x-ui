@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"strings"
@@ -7,8 +7,8 @@ import (
 	"github.com/kolxz2/3x-ui/v3/database/model"
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 >>>>>>> upstream/main:internal/sub/links.go
 )
 

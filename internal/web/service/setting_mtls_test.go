@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
 )
 
 func setupSettingMtlsDB(t *testing.T) *SettingService {

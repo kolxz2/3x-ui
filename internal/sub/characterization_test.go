@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"encoding/base64"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 // Characterization snapshots (Phase 0 of the Hosts feature). These lock the

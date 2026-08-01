@@ -1,4 +1,4 @@
-package controller
+﻿package controller
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
 
 	"github.com/gin-gonic/gin"
 )

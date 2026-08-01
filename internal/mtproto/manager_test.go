@@ -1,10 +1,10 @@
-package mtproto
+﻿package mtproto
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func TestInstanceFromInbound(t *testing.T) {

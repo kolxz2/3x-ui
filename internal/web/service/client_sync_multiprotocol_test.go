@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"path/filepath"
@@ -8,8 +8,8 @@ import (
 	"github.com/kolxz2/3x-ui/v3/database"
 	"github.com/kolxz2/3x-ui/v3/database/model"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 >>>>>>> upstream/main:internal/web/service/client_sync_multiprotocol_test.go
 )
 

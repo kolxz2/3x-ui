@@ -1,4 +1,4 @@
-// Package common provides common utility functions for error handling, formatting, and multi-error management.
+﻿// Package common provides common utility functions for error handling, formatting, and multi-error management.
 package common
 
 import (
@@ -9,7 +9,7 @@ import (
 <<<<<<< HEAD:util/common/err.go
 	"github.com/kolxz2/3x-ui/v3/logger"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 >>>>>>> upstream/main:internal/util/common/err.go
 )
 

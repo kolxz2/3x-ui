@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"testing"
@@ -6,8 +6,8 @@ import (
 <<<<<<< HEAD:web/service/node_test.go
 	"github.com/kolxz2/3x-ui/v3/database/model"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/web/runtime"
 >>>>>>> upstream/main:internal/web/service/node_test.go
 )
 

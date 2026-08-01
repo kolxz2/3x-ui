@@ -1,4 +1,4 @@
-//go:build windows
+﻿//go:build windows
 
 package xray
 
@@ -13,7 +13,7 @@ import (
 >>>>>>> upstream/main:internal/xray/process_windows.go
 	"golang.org/x/sys/windows"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 var (

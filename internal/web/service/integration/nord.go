@@ -1,4 +1,4 @@
-package integration
+﻿package integration
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 <<<<<<< HEAD:web/service/nord.go
 	"github.com/kolxz2/3x-ui/v3/util/common"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 >>>>>>> upstream/main:internal/web/service/integration/nord.go
 )
 

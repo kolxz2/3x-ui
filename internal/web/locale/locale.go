@@ -1,4 +1,4 @@
-// Package locale provides internationalization (i18n) support for the 3x-ui web panel,
+﻿// Package locale provides internationalization (i18n) support for the 3x-ui web panel,
 // including translation loading, localization, and middleware for web and bot interfaces.
 package locale
 
@@ -12,7 +12,7 @@ import (
 <<<<<<< HEAD:web/locale/locale.go
 	"github.com/kolxz2/3x-ui/v3/logger"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 >>>>>>> upstream/main:internal/web/locale/locale.go
 
 	"github.com/gin-gonic/gin"

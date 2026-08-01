@@ -1,12 +1,12 @@
-package service
+﻿package service
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 func pollReport(ds scaleDataset, k int) ([]*xray.Traffic, []*xray.ClientTraffic) {

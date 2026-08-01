@@ -1,4 +1,4 @@
-package job
+﻿package job
 
 import (
 	"encoding/json"
@@ -17,9 +17,9 @@ import (
 >>>>>>> upstream/main:internal/web/job/check_client_ip_job_integration_test.go
 	"github.com/op/go-logging"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	xuilogger "github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 // 3x-ui logger must be initialised once before any code path that can

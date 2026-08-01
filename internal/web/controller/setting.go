@@ -1,4 +1,4 @@
-package controller
+﻿package controller
 
 import (
 	"errors"
@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/email"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
+	"github.com/kolxz2/3x-ui/v3/internal/web/middleware"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/email"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
+	"github.com/kolxz2/3x-ui/v3/internal/web/session"
 
 	"github.com/gin-gonic/gin"
 )

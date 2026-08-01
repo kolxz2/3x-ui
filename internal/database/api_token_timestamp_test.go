@@ -1,4 +1,4 @@
-package database
+﻿package database
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func TestNormalizeApiTokenCreatedAtSeconds(t *testing.T) {

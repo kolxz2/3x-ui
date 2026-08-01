@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"path/filepath"
@@ -9,9 +9,9 @@ import (
 	"github.com/kolxz2/3x-ui/v3/database/model"
 	"github.com/kolxz2/3x-ui/v3/xray"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 >>>>>>> upstream/main:internal/sub/service_userinfo_test.go
 )
 

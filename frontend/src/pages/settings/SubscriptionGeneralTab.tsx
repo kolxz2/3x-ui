@@ -1,4 +1,4 @@
-import { Alert, Button, Input, InputNumber, Switch, Tabs } from 'antd';
+﻿import { Alert, Button, Input, InputNumber, Switch, Tabs } from 'antd';
 import { BranchesOutlined, CompassOutlined, IdcardOutlined, InfoCircleOutlined, NodeIndexOutlined, SafetyCertificateOutlined, SettingOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -139,7 +139,7 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
                 <>
                   {t('pages.settings.subThemeDirDesc')}{' '}
                   <a
-                    href="https://github.com/MHSanaei/3x-ui/blob/main/docs/custom-subscription-templates.md"
+                    href="https://github.com/kolxz2/3x-ui/blob/main/docs/custom-subscription-templates.md"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -1,4 +1,4 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+﻿[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
 
 <p align="center">
   <picture>
@@ -17,7 +17,7 @@
   <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
   <a href="https://goreportcard.com/report/github.com/kolxz2/3x-ui/v3"><img src="https://goreportcard.com/badge/github.com/kolxz2/3x-ui/v3" alt="Go Report Card"></a>
 =======
-  <a href="https://pkg.go.dev/github.com/mhsanaei/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/mhsanaei/3x-ui/v3.svg" alt="Go Reference"></a>
+  <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
 >>>>>>> upstream/main
 </p>
 
@@ -80,13 +80,13 @@ bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh
 若要安装特定版本，请在命令后附加对应的标签（例如 `v3.4.0`）：
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.4.0
+bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh) v3.4.0
 ```
 
 若要安装滚动更新的 **dev** 版本（来自 `main` 的最新逐次提交预发布版本，而非稳定版本），请传入 `dev-latest`：
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
+bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh) dev-latest
 ```
 
 安装过程中会生成随机的用户名、密码和访问路径。安装完成后，运行 `x-ui` 打开管理菜单，您可以在其中启动/停止服务、查看或重置登录凭据、管理 SSL 证书等。

@@ -1,12 +1,12 @@
-package service
+﻿package service
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/web/runtime"
 )
 
 type blockingResetRuntime struct {

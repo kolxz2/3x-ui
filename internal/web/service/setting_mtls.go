@@ -1,10 +1,10 @@
-package service
+﻿package service
 
 import (
 	"crypto/x509"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	"github.com/kolxz2/3x-ui/v3/internal/util/crypto"
 )
 
 const (

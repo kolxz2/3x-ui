@@ -1,4 +1,4 @@
-package database
+﻿package database
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 <<<<<<< HEAD:database/db_seed_test.go
 	"github.com/kolxz2/3x-ui/v3/database/model"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 >>>>>>> upstream/main:internal/database/db_seed_test.go
 )
 

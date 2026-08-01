@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 	"github.com/kolxz2/3x-ui/v3/database/model"
 	"github.com/kolxz2/3x-ui/v3/xray"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 >>>>>>> upstream/main:internal/web/service/client_test.go
 )
 

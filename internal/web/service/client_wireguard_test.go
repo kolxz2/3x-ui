@@ -1,11 +1,11 @@
-package service
+﻿package service
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 )
 
 func TestAllocateWireguardAddress(t *testing.T) {

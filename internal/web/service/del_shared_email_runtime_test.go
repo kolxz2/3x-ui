@@ -1,11 +1,11 @@
-package service
+﻿package service
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 // Deleting a client that is attached to more than one inbound must still remove

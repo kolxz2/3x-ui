@@ -1,4 +1,4 @@
-package websocket
+﻿package websocket
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 >>>>>>> upstream/main:internal/web/websocket/hub_test.go
 	"github.com/op/go-logging"
 
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
+	xuilogger "github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 func TestMain(m *testing.M) {

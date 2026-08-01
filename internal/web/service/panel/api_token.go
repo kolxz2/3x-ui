@@ -1,4 +1,4 @@
-package panel
+﻿package panel
 
 import (
 	"crypto/subtle"
@@ -11,11 +11,11 @@ import (
 	"github.com/kolxz2/3x-ui/v3/util/common"
 	"github.com/kolxz2/3x-ui/v3/util/random"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/random"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	"github.com/kolxz2/3x-ui/v3/internal/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/internal/util/random"
 >>>>>>> upstream/main:internal/web/service/panel/api_token.go
 )
 

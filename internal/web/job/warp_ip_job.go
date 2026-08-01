@@ -1,11 +1,11 @@
-package job
+﻿package job
 
 import (
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/integration"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/integration"
 )
 
 type WarpIpJob struct {

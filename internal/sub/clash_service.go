@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ import (
 	"github.com/kolxz2/3x-ui/v3/logger"
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 >>>>>>> upstream/main:internal/sub/clash_service.go
 )
 

@@ -1,10 +1,10 @@
-package database
+﻿package database
 
 import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 // TestRepairOverflowedTrafficCounters_HealsSQLiteRealPromotion reproduces

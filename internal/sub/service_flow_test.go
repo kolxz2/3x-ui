@@ -1,10 +1,10 @@
-package sub
+﻿package sub
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 // Issue #5232: a vision flow set on a VLESS+XHTTP+REALITY (vlessenc) client

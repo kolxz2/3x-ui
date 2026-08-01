@@ -1,4 +1,4 @@
-// Package main is the entry point for the 3x-ui web panel application.
+﻿// Package main is the entry point for the 3x-ui web panel application.
 // It initializes the database, web server, and handles command-line operations for managing the panel.
 package main
 
@@ -26,18 +26,18 @@ import (
 	"github.com/kolxz2/3x-ui/v3/web/global"
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/sub"
-	"github.com/mhsanaei/3x-ui/v3/internal/tunnelmonitor"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/sys"
-	"github.com/mhsanaei/3x-ui/v3/internal/web"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/global"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/sub"
+	"github.com/kolxz2/3x-ui/v3/internal/tunnelmonitor"
+	"github.com/kolxz2/3x-ui/v3/internal/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/internal/util/sys"
+	"github.com/kolxz2/3x-ui/v3/internal/web"
+	"github.com/kolxz2/3x-ui/v3/internal/web/global"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/tgbot"
 >>>>>>> upstream/main
 
 	"github.com/joho/godotenv"

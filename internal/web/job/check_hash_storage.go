@@ -1,11 +1,11 @@
-package job
+﻿package job
 
 <<<<<<< HEAD:web/job/check_hash_storage.go
 import (
 	"github.com/kolxz2/3x-ui/v3/web/service"
 )
 =======
-import "github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
+import "github.com/kolxz2/3x-ui/v3/internal/web/service/tgbot"
 >>>>>>> upstream/main:internal/web/job/check_hash_storage.go
 
 // CheckHashStorageJob periodically cleans up expired hash entries from the Telegram bot's hash storage.

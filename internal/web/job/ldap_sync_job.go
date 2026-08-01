@@ -1,4 +1,4 @@
-package job
+﻿package job
 
 import (
 	"strings"
@@ -12,10 +12,10 @@ import (
 	ldaputil "github.com/kolxz2/3x-ui/v3/util/ldap"
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	ldaputil "github.com/mhsanaei/3x-ui/v3/internal/util/ldap"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	ldaputil "github.com/kolxz2/3x-ui/v3/internal/util/ldap"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 >>>>>>> upstream/main:internal/web/job/ldap_sync_job.go
 )
 

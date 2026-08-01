@@ -1,12 +1,12 @@
-package service
+﻿package service
 
 import (
 	"bytes"
 	"errors"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/link"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/util/link"
 )
 
 func TestReadBoundedOutboundSubscriptionBody(t *testing.T) {

@@ -1,11 +1,11 @@
-package service
+﻿package service
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 // A full client delete must reach the node as the full-delete RPC so the node

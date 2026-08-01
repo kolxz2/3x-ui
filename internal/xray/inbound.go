@@ -1,4 +1,4 @@
-package xray
+﻿package xray
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 <<<<<<< HEAD:xray/inbound.go
 	"github.com/kolxz2/3x-ui/v3/util/json_util"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
 >>>>>>> upstream/main:internal/xray/inbound.go
 )
 

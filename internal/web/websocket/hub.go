@@ -1,4 +1,4 @@
-// Package websocket provides a WebSocket hub for real-time updates and notifications.
+﻿// Package websocket provides a WebSocket hub for real-time updates and notifications.
 package websocket
 
 import (
@@ -10,7 +10,7 @@ import (
 <<<<<<< HEAD:web/websocket/hub.go
 	"github.com/kolxz2/3x-ui/v3/logger"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 >>>>>>> upstream/main:internal/web/websocket/hub.go
 )
 

@@ -1,13 +1,13 @@
-package controller
+﻿package controller
 
 import (
 	"net/http"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
+	"github.com/kolxz2/3x-ui/v3/internal/web/middleware"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/tgbot"
+	"github.com/kolxz2/3x-ui/v3/internal/web/session"
 
 	"github.com/gin-gonic/gin"
 )

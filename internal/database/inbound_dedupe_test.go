@@ -1,11 +1,11 @@
-package database
+﻿package database
 
 import (
 	"encoding/json"
 	"path/filepath"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 // TestDedupeInboundSettingsClients_CollapsesDuplicateEmails covers the #5770

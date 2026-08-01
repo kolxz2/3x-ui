@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"path/filepath"
@@ -14,9 +14,9 @@ import (
 >>>>>>> upstream/main:internal/web/service/port_conflict_test.go
 	"github.com/op/go-logging"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	xuilogger "github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 // the panel logger is a process-wide singleton. init it once per test

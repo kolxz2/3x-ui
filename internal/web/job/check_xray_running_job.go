@@ -1,4 +1,4 @@
-// Package job provides background job implementations for the 3x-ui web panel,
+﻿// Package job provides background job implementations for the 3x-ui web panel,
 // including traffic monitoring, system checks, and periodic maintenance tasks.
 package job
 
@@ -7,9 +7,9 @@ import (
 	"github.com/kolxz2/3x-ui/v3/logger"
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/eventbus"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 >>>>>>> upstream/main:internal/web/job/check_xray_running_job.go
 )
 

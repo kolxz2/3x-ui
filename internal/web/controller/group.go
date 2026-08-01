@@ -1,4 +1,4 @@
-package controller
+﻿package controller
 
 import (
 	"strings"
@@ -7,8 +7,8 @@ import (
 	"github.com/kolxz2/3x-ui/v3/util/common"
 	"github.com/kolxz2/3x-ui/v3/web/service"
 =======
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 >>>>>>> upstream/main:internal/web/controller/group.go
 
 	"github.com/gin-gonic/gin"
