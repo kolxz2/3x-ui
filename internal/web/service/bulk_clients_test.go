@@ -6,13 +6,8 @@ import (
 	"sort"
 	"testing"
 
-<<<<<<< HEAD:web/service/bulk_clients_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
->>>>>>> upstream/main:internal/web/service/bulk_clients_test.go
 )
 
 func setupBulkDB(t *testing.T) {

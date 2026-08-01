@@ -6,9 +6,6 @@ import (
 	"strings"
 	"sync"
 
-<<<<<<< HEAD:xray/log_writer.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
@@ -17,7 +14,6 @@ import (
 var (
 	crashRegex   = regexp.MustCompile(`(?i)(panic|exception|stack trace|fatal error)`)
 	logLineRegex = regexp.MustCompile(`^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}\.\d{6}) \[([^\]]+)\] (.+)$`)
->>>>>>> upstream/main:internal/xray/log_writer.go
 )
 
 // NewLogWriter returns a new LogWriter for processing Xray log output.

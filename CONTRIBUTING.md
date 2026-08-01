@@ -314,11 +314,7 @@ must match the override, for example `XUI_PORT: "8080"` with `ports: ["8080:8080
 
 ## Issues
 
-<<<<<<< HEAD
 - Bug reports and feature requests: [GitHub Issues](https://github.com/kolxz2/3x-ui/issues)
 - General questions and ideas: [GitHub Discussions](https://github.com/kolxz2/3x-ui/discussions)
-=======
-- Bug reports and feature requests: [GitHub Issues](https://github.com/kolxz2/3x-ui/issues)
->>>>>>> upstream/main
 
 Before filing a bug, include the OS, Go version, panel version (`/panel/api/server/status` or the dashboard footer), and the relevant excerpt from `x-ui/3xui.log`.

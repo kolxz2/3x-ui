@@ -7,10 +7,6 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD:web/websocket/hub_test.go
-	xuilogger "github.com/kolxz2/3x-ui/v3/logger"
-=======
->>>>>>> upstream/main:internal/web/websocket/hub_test.go
 	"github.com/op/go-logging"
 
 	xuilogger "github.com/kolxz2/3x-ui/v3/internal/logger"

@@ -14,21 +14,12 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD:sub/sub.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/util/common"
-	"github.com/kolxz2/3x-ui/v3/web/locale"
-	"github.com/kolxz2/3x-ui/v3/web/middleware"
-	"github.com/kolxz2/3x-ui/v3/web/network"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 	"github.com/kolxz2/3x-ui/v3/internal/web/locale"
 	"github.com/kolxz2/3x-ui/v3/internal/web/middleware"
 	"github.com/kolxz2/3x-ui/v3/internal/web/network"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/sub/sub.go
 
 	"github.com/gin-gonic/gin"
 )

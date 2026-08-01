@@ -8,13 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-<<<<<<< HEAD:web/service/xray_setting.go
-	"github.com/kolxz2/3x-ui/v3/util/common"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/service/xray_setting.go
 )
 
 // XraySettingService provides business logic for Xray configuration management.

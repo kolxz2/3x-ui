@@ -5,13 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-<<<<<<< HEAD:web/job/clear_logs_job.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/job/clear_logs_job.go
 )
 
 const defaultMaxXrayLogBytes int64 = 64 << 20

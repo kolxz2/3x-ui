@@ -3,14 +3,9 @@
 package job
 
 import (
-<<<<<<< HEAD:web/job/check_xray_running_job.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/eventbus"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/web/job/check_xray_running_job.go
 )
 
 // EventBus is set from web layer to publish events.

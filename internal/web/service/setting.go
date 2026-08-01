@@ -14,17 +14,6 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD:web/service/setting.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/util/common"
-	"github.com/kolxz2/3x-ui/v3/util/netproxy"
-	"github.com/kolxz2/3x-ui/v3/util/random"
-	"github.com/kolxz2/3x-ui/v3/util/reflect_util"
-	"github.com/kolxz2/3x-ui/v3/web/entity"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/google/uuid"
 	"github.com/xlzd/gotp"
 	"gorm.io/gorm"
@@ -39,7 +28,6 @@ import (
 	"github.com/kolxz2/3x-ui/v3/internal/util/reflect_util"
 	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/service/setting.go
 )
 
 //go:embed config.json

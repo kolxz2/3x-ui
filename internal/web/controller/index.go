@@ -5,19 +5,12 @@ import (
 	"text/template"
 	"time"
 
-<<<<<<< HEAD:web/controller/index.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/middleware"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-	"github.com/kolxz2/3x-ui/v3/web/session"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/middleware"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service/tgbot"
 	"github.com/kolxz2/3x-ui/v3/internal/web/session"
->>>>>>> upstream/main:internal/web/controller/index.go
 
 	"github.com/gin-gonic/gin"
 )

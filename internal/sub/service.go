@@ -16,15 +16,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 
-<<<<<<< HEAD:sub/subService.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/util/common"
-	"github.com/kolxz2/3x-ui/v3/util/random"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
@@ -33,7 +24,6 @@ import (
 	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/sub/service.go
 )
 
 // SubService provides business logic for generating subscription links and managing subscription data.

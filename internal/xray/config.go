@@ -3,11 +3,7 @@
 import (
 	"bytes"
 
-<<<<<<< HEAD:xray/config.go
-	"github.com/kolxz2/3x-ui/v3/util/json_util"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
->>>>>>> upstream/main:internal/xray/config.go
 )
 
 // Config represents the complete Xray configuration structure.

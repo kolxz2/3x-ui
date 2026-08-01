@@ -6,20 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-<<<<<<< HEAD:web/controller/inbound.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/web/middleware"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-	"github.com/kolxz2/3x-ui/v3/web/session"
-	"github.com/kolxz2/3x-ui/v3/web/websocket"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/web/middleware"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 	"github.com/kolxz2/3x-ui/v3/internal/web/session"
 	"github.com/kolxz2/3x-ui/v3/internal/web/websocket"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/controller/inbound.go
 
 	"github.com/gin-gonic/gin"
 )

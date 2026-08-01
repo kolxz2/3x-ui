@@ -3,11 +3,7 @@
 import (
 	"testing"
 
-<<<<<<< HEAD:xray/inbound_test.go
-	"github.com/kolxz2/3x-ui/v3/util/json_util"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
->>>>>>> upstream/main:internal/xray/inbound_test.go
 )
 
 func makeInbound() InboundConfig {

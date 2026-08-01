@@ -28,21 +28,12 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD:web/service/server.go
-	"github.com/kolxz2/3x-ui/v3/config"
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/util/common"
-	"github.com/kolxz2/3x-ui/v3/util/sys"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/config"
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 	"github.com/kolxz2/3x-ui/v3/internal/util/sys"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/service/server.go
 
 	"github.com/google/uuid"
 	utls "github.com/refraction-networking/utls"

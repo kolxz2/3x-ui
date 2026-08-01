@@ -8,12 +8,8 @@ import (
 	"net/http"
 	"time"
 
-<<<<<<< HEAD:web/service/nord.go
-	"github.com/kolxz2/3x-ui/v3/util/common"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/web/service/integration/nord.go
 )
 
 type NordService struct {

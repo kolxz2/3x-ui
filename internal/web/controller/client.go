@@ -5,15 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-<<<<<<< HEAD:web/controller/client.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-	"github.com/kolxz2/3x-ui/v3/web/websocket"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 	"github.com/kolxz2/3x-ui/v3/internal/web/websocket"
->>>>>>> upstream/main:internal/web/controller/client.go
 
 	"github.com/gin-gonic/gin"
 )

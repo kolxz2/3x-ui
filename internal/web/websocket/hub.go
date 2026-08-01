@@ -7,11 +7,7 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD:web/websocket/hub.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
->>>>>>> upstream/main:internal/web/websocket/hub.go
 )
 
 // MessageType identifies the kind of WebSocket message.

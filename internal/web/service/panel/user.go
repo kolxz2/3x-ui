@@ -3,14 +3,6 @@
 import (
 	"errors"
 
-<<<<<<< HEAD:web/service/user.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/util/crypto"
-	ldaputil "github.com/kolxz2/3x-ui/v3/util/ldap"
-=======
->>>>>>> upstream/main:internal/web/service/panel/user.go
 	"github.com/xlzd/gotp"
 	"gorm.io/gorm"
 

@@ -4,15 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-<<<<<<< HEAD:sub/subService_userinfo_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/sub/service_userinfo_test.go
 )
 
 func TestAggregateTrafficByEmails_FallsBackToClientLimits(t *testing.T) {

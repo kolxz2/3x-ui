@@ -105,25 +105,12 @@ export default function IndexPage() {
     await refresh();
   }, [refresh]);
 
-<<<<<<< HEAD
-  function openPanelVersion() {
-    if (panelUpdateInfo.updateAvailable) {
-      setPanelUpdateOpen(true);
-    } else {
-      window.open('https://github.com/kolxz2/3x-ui/releases', '_blank', 'noopener,noreferrer');
-    }
-  }
-
-  function openTelegram() {
-    window.open('https://t.me/XrayUI', '_blank', 'noopener,noreferrer');
-=======
   async function handleChannelChange(dev: boolean) {
     const res = await HttpUtil.post('/panel/api/server/setUpdateChannel', { dev });
     if (!res?.success) return;
     setDevChannelEnable(dev);
     const msg = await HttpUtil.get<PanelUpdateInfo>('/panel/api/server/getPanelUpdateInfo');
     if (msg?.success && msg.obj) setPanelUpdateInfo(msg.obj);
->>>>>>> upstream/main
   }
 
   async function openConfig() {

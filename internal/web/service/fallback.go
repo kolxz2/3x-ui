@@ -5,13 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-<<<<<<< HEAD:web/service/fallback.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
->>>>>>> upstream/main:internal/web/service/fallback.go
 
 	"gorm.io/gorm"
 )

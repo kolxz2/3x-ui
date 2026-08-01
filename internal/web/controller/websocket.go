@@ -6,15 +6,9 @@ import (
 	"net/url"
 	"strings"
 
-<<<<<<< HEAD:web/controller/websocket.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-	"github.com/kolxz2/3x-ui/v3/web/session"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
 	"github.com/kolxz2/3x-ui/v3/internal/web/session"
->>>>>>> upstream/main:internal/web/controller/websocket.go
 
 	"github.com/gin-gonic/gin"
 	ws "github.com/gorilla/websocket"

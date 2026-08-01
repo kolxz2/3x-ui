@@ -15,17 +15,6 @@ import (
 	"time"
 	_ "unsafe"
 
-<<<<<<< HEAD
-	"github.com/kolxz2/3x-ui/v3/config"
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/sub"
-	"github.com/kolxz2/3x-ui/v3/util/crypto"
-	"github.com/kolxz2/3x-ui/v3/util/sys"
-	"github.com/kolxz2/3x-ui/v3/web"
-	"github.com/kolxz2/3x-ui/v3/web/global"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/config"
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
@@ -38,7 +27,6 @@ import (
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service/tgbot"
->>>>>>> upstream/main
 
 	"github.com/joho/godotenv"
 	"github.com/op/go-logging"

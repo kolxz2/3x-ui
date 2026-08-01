@@ -8,14 +8,9 @@ import (
 	"strings"
 	"sync"
 
-<<<<<<< HEAD:web/runtime/local.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/mtproto"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/runtime/local.go
 )
 
 type LocalDeps struct {

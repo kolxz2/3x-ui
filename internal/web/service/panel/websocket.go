@@ -7,15 +7,9 @@ package panel
 import (
 	"time"
 
-<<<<<<< HEAD:web/service/websocket.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/util/common"
-	"github.com/kolxz2/3x-ui/v3/web/websocket"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 	"github.com/kolxz2/3x-ui/v3/internal/web/websocket"
->>>>>>> upstream/main:internal/web/service/panel/websocket.go
 
 	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"

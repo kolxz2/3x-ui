@@ -10,10 +10,6 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD:logger/logger.go
-	"github.com/kolxz2/3x-ui/v3/config"
-=======
->>>>>>> upstream/main:internal/logger/logger.go
 	"github.com/op/go-logging"
 
 	"github.com/kolxz2/3x-ui/v3/internal/config"

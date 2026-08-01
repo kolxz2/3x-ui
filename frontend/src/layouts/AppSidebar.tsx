@@ -42,12 +42,8 @@ import { useAllSettings } from '@/api/queries/useAllSettings';
 import './AppSidebar.css';
 
 const DONATE_URL = 'https://donate.sanaei.dev/';
-<<<<<<< HEAD
-const REPO_URL = 'https://github.com/kolxz2/3x-ui';
-=======
 const DOCS_URL = 'https://docs.sanaei.dev/';
 const REPO_URL = 'https://github.com/kolxz2/3x-ui';
->>>>>>> upstream/main
 const LOGOUT_KEY = '__logout__';
 const RAIL_WIDTH = 72;
 const SIDER_WIDTH = 220;

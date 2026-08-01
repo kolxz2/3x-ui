@@ -4,19 +4,10 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD:web/job/ldap_sync_job.go
-	"github.com/google/uuid"
-
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	ldaputil "github.com/kolxz2/3x-ui/v3/util/ldap"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	ldaputil "github.com/kolxz2/3x-ui/v3/internal/util/ldap"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/web/job/ldap_sync_job.go
 )
 
 var DefaultTruthyValues = []string{"true", "1", "yes", "on"}

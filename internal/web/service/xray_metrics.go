@@ -12,12 +12,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-<<<<<<< HEAD:web/service/xray_metrics.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/eventbus"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
->>>>>>> upstream/main:internal/web/service/xray_metrics.go
 )
 
 type xrayMetricsState struct {

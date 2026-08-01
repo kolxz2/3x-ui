@@ -5,11 +5,7 @@ import (
 	"encoding/base64"
 	"net/http"
 
-<<<<<<< HEAD:web/middleware/security.go
-	"github.com/kolxz2/3x-ui/v3/web/session"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/web/session"
->>>>>>> upstream/main:internal/web/middleware/security.go
 
 	"github.com/gin-gonic/gin"
 )

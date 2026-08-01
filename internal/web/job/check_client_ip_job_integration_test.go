@@ -9,12 +9,6 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD:web/job/check_client_ip_job_integration_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	xuilogger "github.com/kolxz2/3x-ui/v3/logger"
-=======
->>>>>>> upstream/main:internal/web/job/check_client_ip_job_integration_test.go
 	"github.com/op/go-logging"
 
 	"github.com/kolxz2/3x-ui/v3/internal/database"

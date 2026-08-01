@@ -7,14 +7,10 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD:web/service/traffic_writer.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 
 	"gorm.io/gorm"
->>>>>>> upstream/main:internal/web/service/traffic_writer.go
 )
 
 const (

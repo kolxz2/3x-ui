@@ -2,13 +2,8 @@
 package websocket
 
 import (
-<<<<<<< HEAD:web/websocket/notifier.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/global"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/global"
->>>>>>> upstream/main:internal/web/websocket/notifier.go
 )
 
 // GetHub returns the global WebSocket hub instance.

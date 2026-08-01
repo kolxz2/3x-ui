@@ -7,10 +7,6 @@ import (
 	"sync"
 	"unsafe"
 
-<<<<<<< HEAD:xray/process_windows.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
->>>>>>> upstream/main:internal/xray/process_windows.go
 	"golang.org/x/sys/windows"
 
 	"github.com/kolxz2/3x-ui/v3/internal/logger"

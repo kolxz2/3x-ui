@@ -5,11 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-<<<<<<< HEAD:web/session/session_test.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
->>>>>>> upstream/main:internal/web/session/session_test.go
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"

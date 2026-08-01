@@ -13,12 +13,8 @@
   <a href="#"><img src="https://img.shields.io/github/go-mod/go-version/kolxz2/3x-ui.svg" alt="GO Version"></a>
   <a href="https://github.com/kolxz2/3x-ui/releases/latest"><img src="https://img.shields.io/github/downloads/kolxz2/3x-ui/total.svg" alt="Downloads"></a>
   <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true" alt="License"></a>
-<<<<<<< HEAD
   <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
   <a href="https://goreportcard.com/report/github.com/kolxz2/3x-ui/v3"><img src="https://goreportcard.com/badge/github.com/kolxz2/3x-ui/v3" alt="Go Report Card"></a>
-=======
-  <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
->>>>>>> upstream/main
 </p>
 
 **3X-UI** 是一个先进的开源 Web 控制面板，用于管理 [Xray-core](https://github.com/XTLS/Xray-core) 服务器。它提供简洁、多语言的界面，用于部署、配置和监控各种代理与 VPN 协议——从单台 VPS 到多节点部署。

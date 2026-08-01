@@ -5,15 +5,9 @@ import (
 	"net/http"
 	"time"
 
-<<<<<<< HEAD:web/session/session.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
->>>>>>> upstream/main:internal/web/session/session.go
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"

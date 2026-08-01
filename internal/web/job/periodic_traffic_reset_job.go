@@ -1,15 +1,10 @@
 ﻿package job
 
 import (
-<<<<<<< HEAD:web/job/periodic_traffic_reset_job.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"time"
 
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/web/job/periodic_traffic_reset_job.go
 )
 
 // Period represents the time period for traffic resets.

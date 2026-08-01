@@ -10,11 +10,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 
-<<<<<<< HEAD:web/middleware/validate.go
-	"github.com/kolxz2/3x-ui/v3/web/entity"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
->>>>>>> upstream/main:internal/web/middleware/validate.go
 )
 
 var validate = validator.New(validator.WithRequiredStructEnabled())

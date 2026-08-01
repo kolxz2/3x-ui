@@ -4,13 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-<<<<<<< HEAD:web/service/client_sync_multiprotocol_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
->>>>>>> upstream/main:internal/web/service/client_sync_multiprotocol_test.go
 )
 
 func TestSyncInbound_PreservesCredentialsAcrossProtocols(t *testing.T) {

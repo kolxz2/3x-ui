@@ -10,14 +10,10 @@ import (
 	"os"
 	"time"
 
-<<<<<<< HEAD:web/service/warp.go
-	"github.com/kolxz2/3x-ui/v3/util/common"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 	"github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/web/service/integration/warp.go
 )
 
 // WarpService provides business logic for Cloudflare WARP integration.

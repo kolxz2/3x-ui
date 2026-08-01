@@ -4,13 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-<<<<<<< HEAD:web/service/client_test.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/xray"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/xray"
->>>>>>> upstream/main:internal/web/service/client_test.go
 )
 
 func TestClientWithAttachmentsMarshalJSONIncludesExtras(t *testing.T) {

@@ -6,11 +6,7 @@ import (
 	"regexp"
 	"testing"
 
-<<<<<<< HEAD:database/db_seed_test.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
->>>>>>> upstream/main:internal/database/db_seed_test.go
 )
 
 func TestSeedClientsFromInboundJSON_IsIdempotentAgainstExistingClients(t *testing.T) {

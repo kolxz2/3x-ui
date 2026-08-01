@@ -8,14 +8,8 @@ import (
 	"github.com/goccy/go-json"
 	yaml "github.com/goccy/go-yaml"
 
-<<<<<<< HEAD:sub/subClashService.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
->>>>>>> upstream/main:internal/sub/clash_service.go
 )
 
 type SubClashService struct {

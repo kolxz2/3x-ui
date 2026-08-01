@@ -1416,19 +1416,6 @@ install_x-ui() {
 
     # Download resources
     if [ $# == 0 ]; then
-<<<<<<< HEAD
-        tag_version=$(curl -Ls "https://api.github.com/repos/kolxz2/3x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-        if [[ ! -n "$tag_version" ]]; then
-            echo -e "${yellow}Trying to fetch version with IPv4...${plain}"
-            tag_version=$(curl -4 -Ls "https://api.github.com/repos/kolxz2/3x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            if [[ ! -n "$tag_version" ]]; then
-                echo -e "${red}Failed to fetch x-ui version, it may be due to GitHub API restrictions, please try it later${plain}"
-                exit 1
-            fi
-        fi
-        echo -e "Got x-ui latest version: ${tag_version}, beginning the installation..."
-        curl -4fLRo ${xui_folder}-linux-$(arch).tar.gz https://github.com/kolxz2/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz
-=======
         tag_version=$(curl -Ls --retry 5 --retry-delay 3 --connect-timeout 15 --max-time 60 "https://api.github.com/repos/kolxz2/3x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$tag_version" ]]; then
             echo -e "${red}Failed to fetch x-ui version, it may be due to GitHub API restrictions, please try it later${plain}"
@@ -1436,7 +1423,6 @@ install_x-ui() {
         fi
         echo -e "Got x-ui latest version: ${tag_version}, beginning the installation..."
         curl -fLR --retry 5 --retry-delay 3 --connect-timeout 15 --speed-limit 1 --speed-time 300 -o ${xui_folder}-linux-$(arch).tar.gz https://github.com/kolxz2/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz
->>>>>>> upstream/main
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Downloading x-ui failed, please be sure that your server can access GitHub ${plain}"
             exit 1
@@ -1464,15 +1450,9 @@ install_x-ui() {
             fi
         fi
 
-<<<<<<< HEAD
-        url="https://github.com/kolxz2/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz"
-        echo -e "Beginning to install x-ui $1"
-        curl -4fLRo ${xui_folder}-linux-$(arch).tar.gz ${url}
-=======
         url="https://github.com/kolxz2/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz"
         echo -e "Beginning to install x-ui ${tag_version}"
         curl -fLR --retry 5 --retry-delay 3 --connect-timeout 15 --speed-limit 1 --speed-time 300 -o ${xui_folder}-linux-$(arch).tar.gz ${url}
->>>>>>> upstream/main
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Download x-ui ${tag_version} failed, please check if the version exists ${plain}"
             exit 1
@@ -1483,13 +1463,9 @@ install_x-ui() {
             exit 1
         fi
     fi
-<<<<<<< HEAD
-    curl -4fLRo /usr/bin/x-ui-temp https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh
-=======
     local xui_script_temp="/usr/bin/x-ui-temp.$$"
     rm -f "${xui_script_temp}"
     curl -fLRo "${xui_script_temp}" https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh
->>>>>>> upstream/main
     if [[ $? -ne 0 ]]; then
         rm -f "${xui_script_temp}"
         echo -e "${red}Failed to download x-ui.sh${plain}"
@@ -1579,13 +1555,9 @@ install_x-ui() {
     fi
 
     if [[ $release == "alpine" ]]; then
-<<<<<<< HEAD
-        curl -4fLRo /etc/init.d/x-ui https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.rc
-=======
         xui_rc_temp="/etc/init.d/x-ui.tmp.$$"
         rm -f "${xui_rc_temp}"
         curl -fLRo "${xui_rc_temp}" https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.rc
->>>>>>> upstream/main
         if [[ $? -ne 0 ]]; then
             rm -f "${xui_rc_temp}"
             echo -e "${red}Failed to download x-ui.rc${plain}"
@@ -1650,15 +1622,6 @@ install_x-ui() {
             echo -e "${yellow}Service files not found in tar.gz, downloading from GitHub...${plain}"
             case "${release}" in
                 ubuntu | debian | armbian)
-<<<<<<< HEAD
-                    curl -4fLRo ${xui_service}/x-ui.service https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.debian > /dev/null 2>&1
-                    ;;
-                arch | manjaro | parch)
-                    curl -4fLRo ${xui_service}/x-ui.service https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.arch > /dev/null 2>&1
-                    ;;
-                *)
-                    curl -4fLRo ${xui_service}/x-ui.service https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.rhel > /dev/null 2>&1
-=======
                     service_unit_url="https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.debian"
                     ;;
                 arch | manjaro | parch)
@@ -1666,7 +1629,6 @@ install_x-ui() {
                     ;;
                 *)
                     service_unit_url="https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.rhel"
->>>>>>> upstream/main
                     ;;
             esac
 

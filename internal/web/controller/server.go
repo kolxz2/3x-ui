@@ -8,14 +8,6 @@ import (
 	"strconv"
 	"time"
 
-<<<<<<< HEAD:web/controller/server.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/entity"
-	"github.com/kolxz2/3x-ui/v3/web/global"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-	"github.com/kolxz2/3x-ui/v3/web/websocket"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
@@ -23,7 +15,6 @@ import (
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service/panel"
 	"github.com/kolxz2/3x-ui/v3/internal/web/websocket"
->>>>>>> upstream/main:internal/web/controller/server.go
 
 	"github.com/gin-gonic/gin"
 )

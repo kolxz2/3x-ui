@@ -981,12 +981,6 @@ update_x-ui() {
 
     echo -e "${green}Downloading new x-ui version...${plain}"
 
-<<<<<<< HEAD
-    tag_version=$(${curl_bin} -Ls "https://api.github.com/repos/kolxz2/3x-ui/releases/latest" 2> /dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-    if [[ ! -n "$tag_version" ]]; then
-        echo -e "${yellow}Trying to fetch version with IPv4...${plain}"
-        tag_version=$(${curl_bin} -4 -Ls "https://api.github.com/repos/kolxz2/3x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-=======
     # XUI_UPDATE_TAG lets the panel target a specific release tag (e.g. the
     # rolling dev-latest pre-release). Empty keeps the default latest-stable flow.
     if [[ -n "${XUI_UPDATE_TAG}" ]]; then
@@ -994,7 +988,6 @@ update_x-ui() {
         echo -e "${green}Using update tag: ${tag_version}${plain}"
     else
         tag_version=$(${curl_bin} -Ls "https://api.github.com/repos/kolxz2/3x-ui/releases/latest" 2> /dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
->>>>>>> upstream/main
         if [[ ! -n "$tag_version" ]]; then
             _fail "ERROR: Failed to fetch x-ui version, it may be due to GitHub API restrictions, please try it later"
         fi
@@ -1002,19 +995,11 @@ update_x-ui() {
     echo -e "Got x-ui latest version: ${tag_version}, beginning the installation..."
     ${curl_bin} -fLRo ${xui_folder}-linux-$(arch).tar.gz https://github.com/kolxz2/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz 2> /dev/null
     if [[ $? -ne 0 ]]; then
-<<<<<<< HEAD
-        echo -e "${yellow}Trying to fetch version with IPv4...${plain}"
-        ${curl_bin} -4fLRo ${xui_folder}-linux-$(arch).tar.gz https://github.com/kolxz2/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz 2> /dev/null
-        if [[ $? -ne 0 ]]; then
-            _fail "ERROR: Failed to download x-ui, please be sure that your server can access GitHub"
-        fi
-=======
         _fail "ERROR: Failed to download x-ui, please be sure that your server can access GitHub"
     fi
     if [[ ! -s ${xui_folder}-linux-$(arch).tar.gz ]]; then
         rm ${xui_folder}-linux-$(arch).tar.gz -f > /dev/null 2>&1
         _fail "ERROR: Downloaded x-ui release archive is empty, please be sure that your server can access GitHub"
->>>>>>> upstream/main
     fi
 
     if [[ -e ${xui_folder}/ ]]; then
@@ -1099,15 +1084,6 @@ update_x-ui() {
     fi
 
     echo -e "${green}Downloading and installing x-ui.sh script...${plain}"
-<<<<<<< HEAD
-    ${curl_bin} -fLRo /usr/bin/x-ui https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh > /dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        echo -e "${yellow}Trying to fetch x-ui with IPv4...${plain}"
-        ${curl_bin} -4fLRo /usr/bin/x-ui https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh > /dev/null 2>&1
-        if [[ $? -ne 0 ]]; then
-            _fail "ERROR: Failed to download x-ui.sh script, please be sure that your server can access GitHub"
-        fi
-=======
     local xui_script_temp="/usr/bin/x-ui-temp.$$"
     rm -f "${xui_script_temp}"
     ${curl_bin} -fLRo "${xui_script_temp}" https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh > /dev/null 2>&1
@@ -1123,7 +1099,6 @@ update_x-ui() {
     if [[ $? -ne 0 ]]; then
         rm -f "${xui_script_temp}"
         _fail "ERROR: Failed to install x-ui.sh script"
->>>>>>> upstream/main
     fi
 
     chmod +x ${xui_folder}/x-ui.sh > /dev/null 2>&1
@@ -1140,14 +1115,6 @@ update_x-ui() {
 
     if [[ $release == "alpine" ]]; then
         echo -e "${green}Downloading and installing startup unit x-ui.rc...${plain}"
-<<<<<<< HEAD
-        ${curl_bin} -fLRo /etc/init.d/x-ui https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.rc > /dev/null 2>&1
-        if [[ $? -ne 0 ]]; then
-            ${curl_bin} -4fLRo /etc/init.d/x-ui https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.rc > /dev/null 2>&1
-            if [[ $? -ne 0 ]]; then
-                _fail "ERROR: Failed to download startup unit x-ui.rc, please be sure that your server can access GitHub"
-            fi
-=======
         xui_rc_temp="/etc/init.d/x-ui.tmp.$$"
         rm -f "${xui_rc_temp}"
         ${curl_bin} -fLRo "${xui_rc_temp}" https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.rc > /dev/null 2>&1
@@ -1163,7 +1130,6 @@ update_x-ui() {
         if [[ $? -ne 0 ]]; then
             rm -f "${xui_rc_temp}"
             _fail "ERROR: Failed to install startup unit x-ui.rc"
->>>>>>> upstream/main
         fi
         chmod +x /etc/init.d/x-ui > /dev/null 2>&1
         chown root:root /etc/init.d/x-ui > /dev/null 2>&1
@@ -1210,15 +1176,6 @@ update_x-ui() {
                 echo -e "${yellow}Service files not found in tar.gz, downloading from GitHub...${plain}"
                 case "${release}" in
                     ubuntu | debian | armbian)
-<<<<<<< HEAD
-                        ${curl_bin} -4fLRo ${xui_service}/x-ui.service https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.debian > /dev/null 2>&1
-                        ;;
-                    arch | manjaro | parch)
-                        ${curl_bin} -4fLRo ${xui_service}/x-ui.service https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.arch > /dev/null 2>&1
-                        ;;
-                    *)
-                        ${curl_bin} -4fLRo ${xui_service}/x-ui.service https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.rhel > /dev/null 2>&1
-=======
                         service_unit_url="https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.debian"
                         ;;
                     arch | manjaro | parch)
@@ -1226,7 +1183,6 @@ update_x-ui() {
                         ;;
                     *)
                         service_unit_url="https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.service.rhel"
->>>>>>> upstream/main
                         ;;
                 esac
 

@@ -219,16 +219,8 @@ update_menu() {
         return 0
     fi
 
-<<<<<<< HEAD
-    curl -fLRo /usr/bin/x-ui https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh
-    chmod +x ${xui_folder}/x-ui.sh
-    chmod +x /usr/bin/x-ui
-
-    if [[ $? == 0 ]]; then
-=======
     if replace_xui_script "https://raw.githubusercontent.com/kolxz2/3x-ui/main/x-ui.sh" "false"; then
         chmod +x ${xui_folder}/x-ui.sh
->>>>>>> upstream/main
         echo -e "${green}Update successful. The panel has automatically restarted.${plain}"
         exit 0
     else
@@ -844,15 +836,8 @@ enable_bbr() {
 }
 
 update_shell() {
-<<<<<<< HEAD
-    curl -fLRo /usr/bin/x-ui -z /usr/bin/x-ui https://github.com/kolxz2/3x-ui/raw/main/x-ui.sh
-    if [[ $? != 0 ]]; then
-        echo ""
-        LOGE "Failed to download script, Please check whether the machine can connect Github"
-=======
     if replace_xui_script "https://github.com/kolxz2/3x-ui/raw/main/x-ui.sh" "true"; then
         LOGI "Upgrade script succeeded, Please rerun the script"
->>>>>>> upstream/main
         before_show_menu
     else
         echo ""

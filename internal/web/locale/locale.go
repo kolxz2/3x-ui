@@ -9,11 +9,7 @@ import (
 	"os"
 	"strings"
 
-<<<<<<< HEAD:web/locale/locale.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
->>>>>>> upstream/main:internal/web/locale/locale.go
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"

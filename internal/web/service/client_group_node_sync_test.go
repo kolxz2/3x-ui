@@ -5,15 +5,9 @@ import (
 	"strings"
 	"testing"
 
-<<<<<<< HEAD:web/service/client_group_node_sync_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/web/runtime"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/web/runtime"
->>>>>>> upstream/main:internal/web/service/client_group_node_sync_test.go
 )
 
 func TestSetRemoteTraffic_PreservesPanelLocalGroupAndComment(t *testing.T) {

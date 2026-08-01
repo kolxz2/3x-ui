@@ -6,11 +6,7 @@ import (
 	"strings"
 	"testing"
 
-<<<<<<< HEAD:sub/subService_test.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
->>>>>>> upstream/main:internal/sub/service_test.go
 )
 
 func TestSubscriptionExpiryFromClient(t *testing.T) {

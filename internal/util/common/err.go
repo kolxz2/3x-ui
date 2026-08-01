@@ -6,11 +6,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-<<<<<<< HEAD:util/common/err.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
->>>>>>> upstream/main:internal/util/common/err.go
 )
 
 // NewErrorf creates a new error with formatted message.

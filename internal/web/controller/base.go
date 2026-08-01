@@ -5,15 +5,9 @@ package controller
 import (
 	"net/http"
 
-<<<<<<< HEAD:web/controller/base.go
-	"github.com/kolxz2/3x-ui/v3/logger"
-	"github.com/kolxz2/3x-ui/v3/web/locale"
-	"github.com/kolxz2/3x-ui/v3/web/session"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/logger"
 	"github.com/kolxz2/3x-ui/v3/internal/web/locale"
 	"github.com/kolxz2/3x-ui/v3/internal/web/session"
->>>>>>> upstream/main:internal/web/controller/base.go
 
 	"github.com/gin-gonic/gin"
 )

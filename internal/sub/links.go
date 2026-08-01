@@ -3,13 +3,8 @@
 import (
 	"strings"
 
-<<<<<<< HEAD:sub/links.go
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/web/service"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/web/service"
->>>>>>> upstream/main:internal/sub/links.go
 )
 
 type LinkProvider struct {

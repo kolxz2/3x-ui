@@ -5,15 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-<<<<<<< HEAD:web/service/port_conflict.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/util/common"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/util/common"
->>>>>>> upstream/main:internal/web/service/port_conflict.go
 )
 
 type transportBits uint8

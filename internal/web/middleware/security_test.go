@@ -6,11 +6,7 @@ import (
 	"strings"
 	"testing"
 
-<<<<<<< HEAD:web/middleware/security_test.go
-	"github.com/kolxz2/3x-ui/v3/web/session"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/web/session"
->>>>>>> upstream/main:internal/web/middleware/security_test.go
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"

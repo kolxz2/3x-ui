@@ -6,12 +6,6 @@ import (
 	"sync"
 	"testing"
 
-<<<<<<< HEAD:web/service/port_conflict_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	xuilogger "github.com/kolxz2/3x-ui/v3/logger"
-=======
->>>>>>> upstream/main:internal/web/service/port_conflict_test.go
 	"github.com/op/go-logging"
 
 	"github.com/kolxz2/3x-ui/v3/internal/database"

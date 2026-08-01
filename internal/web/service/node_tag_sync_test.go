@@ -3,15 +3,9 @@
 import (
 	"testing"
 
-<<<<<<< HEAD:web/service/node_tag_sync_test.go
-	"github.com/kolxz2/3x-ui/v3/database"
-	"github.com/kolxz2/3x-ui/v3/database/model"
-	"github.com/kolxz2/3x-ui/v3/web/runtime"
-=======
 	"github.com/kolxz2/3x-ui/v3/internal/database"
 	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 	"github.com/kolxz2/3x-ui/v3/internal/web/runtime"
->>>>>>> upstream/main:internal/web/service/node_tag_sync_test.go
 )
 
 // A node-backed inbound whose central tag carries the n<id>- prefix must
