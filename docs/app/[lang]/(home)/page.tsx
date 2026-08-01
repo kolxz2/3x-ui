@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { ArrowRight, BookOpen, Heart } from 'lucide-react';
 import { GitHubIcon, TelegramIcon } from '@/components/icons';
 import { Logo } from '@/components/logo';
@@ -15,7 +15,7 @@ export function generateStaticParams() {
 }
 
 const INSTALL_COMMAND =
-  'bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)';
+  'bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh)';
 
 export default async function HomePage({ params }: PageProps<'/[lang]'>) {
   const { lang } = await params;

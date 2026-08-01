@@ -1,4 +1,4 @@
-// Package model defines the database models and data structures used by the 3x-ui panel.
+﻿// Package model defines the database models and data structures used by the 3x-ui panel.
 package model
 
 import (
@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 // Protocol represents the protocol type for Xray inbounds.

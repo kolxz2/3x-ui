@@ -1,4 +1,4 @@
-// Pure builders for 3x-ui install commands (script + Docker). No React/DOM.
+﻿// Pure builders for 3x-ui install commands (script + Docker). No React/DOM.
 
 export type InstallMethod = 'script' | 'docker';
 
@@ -11,8 +11,8 @@ export interface InstallOptions {
   webBasePath: string;
 }
 
-const REPO_RAW = 'https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh';
-const IMAGE = 'ghcr.io/mhsanaei/3x-ui:latest';
+const REPO_RAW = 'https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh';
+const IMAGE = 'ghcr.io/kolxz2/3x-ui:latest';
 
 function isLatest(version: string): boolean {
   const v = version.trim().toLowerCase();

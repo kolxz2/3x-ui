@@ -1,10 +1,10 @@
-package service
+﻿package service
 
 import (
 	"sync"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 func TestXrayLifecycleSnapshotDoesNotOverwriteNewerResult(t *testing.T) {

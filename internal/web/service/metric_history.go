@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"encoding/gob"
@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 // MetricSample is one point of any time-series we keep in memory.

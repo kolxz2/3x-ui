@@ -1,4 +1,4 @@
-package runtime
+﻿package runtime
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/util/crypto"
 )
 
 type generationProbeTransport struct {

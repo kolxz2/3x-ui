@@ -1,10 +1,10 @@
-package job
+﻿package job
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/mtproto"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 // MtprotoJob reconciles the running mtg sidecar processes against the enabled

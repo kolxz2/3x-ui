@@ -1,4 +1,4 @@
-#cloud-config
+﻿#cloud-config
 # ---------------------------------------------------------------------------
 # Generic 3x-ui unattended install via cloud-init user-data.
 #
@@ -44,7 +44,7 @@ write_files:
       #   export XUI_DB_DSN="postgres://user:pass@host:5432/db?sslmode=disable"
       # ------------------------------------------------------------------------
 
-      curl -fsSL https://raw.githubusercontent.com/MHSanaei/3x-ui/main/install.sh | bash
+      curl -fsSL https://raw.githubusercontent.com/kolxz2/3x-ui/main/install.sh | bash
 
       # Surface the generated credentials. Full creds (incl. password + API token)
       # go ONLY to the serial console (/dev/console, owner-only). /etc/motd is

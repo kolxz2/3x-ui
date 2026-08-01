@@ -1,4 +1,4 @@
-package database
+﻿package database
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func initMigrateDB(t *testing.T) {

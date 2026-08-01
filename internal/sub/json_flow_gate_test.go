@@ -1,12 +1,12 @@
-package sub
+﻿package sub
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func seedFlowInbound(t *testing.T, subId, tag string, port int, stream string) *model.Inbound {

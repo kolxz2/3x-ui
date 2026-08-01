@@ -1,11 +1,11 @@
-package service
+﻿package service
 
 import (
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/web/entity"
 )
 
 func mkHost(t *testing.T, svc *HostService, inboundId int, remark string, order int) *entity.HostGroup {

@@ -1,4 +1,4 @@
-package xray
+﻿package xray
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
 )
 
 // ---------------------------------------------------------------------------

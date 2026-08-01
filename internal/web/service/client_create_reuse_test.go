@@ -1,10 +1,10 @@
-package service
+﻿package service
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func settingsHoldUUID(t *testing.T, inboundSvc *InboundService, inboundId int, uuid string) bool {

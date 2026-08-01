@@ -1,4 +1,4 @@
-package integration
+﻿package integration
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
 )
 
 func TestDoWarpRequestCapsResponseBody(t *testing.T) {

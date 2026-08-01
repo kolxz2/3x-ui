@@ -1,4 +1,4 @@
-package email
+﻿package email
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 )
 
 // EmailService sends email notifications via SMTP.

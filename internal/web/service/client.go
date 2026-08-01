@@ -1,4 +1,4 @@
-// Package service implements the panel's business-logic layer.
+﻿// Package service implements the panel's business-logic layer.
 //
 // ClientService owns the lifecycle of VPN clients: creation, update, deletion,
 // attach/detach to inbounds, bulk operations, group membership, traffic resets,
@@ -14,8 +14,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 type ClientWithAttachments struct {

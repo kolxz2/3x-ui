@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"context"
@@ -12,9 +12,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/web/runtime"
 )
 
 // fakeNodePanel serves just enough of the node API for ReconcileNode: the

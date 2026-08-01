@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"encoding/json"
@@ -14,11 +14,11 @@ import (
 	"github.com/op/go-logging"
 	"gorm.io/gorm"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	xuilogger "github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 const scaleTargetSubId = "scale-target-sub"

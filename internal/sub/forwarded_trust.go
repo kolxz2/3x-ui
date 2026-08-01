@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"net"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
 )
 
 var warnSuppressedForwardedOnce sync.Once

@@ -1,11 +1,11 @@
-package service
+﻿package service
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 const realityFinalMaskStream = `{"network":"tcp","security":"reality","realitySettings":{},"finalmask":{"tcp":[{"type":"fragment","settings":{"packets":"tlshello"}}]}}`

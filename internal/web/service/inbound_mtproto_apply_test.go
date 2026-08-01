@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"fmt"
@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/mtproto"
+	"github.com/kolxz2/3x-ui/v3/internal/web/runtime"
 )
 
 func mtgConfigPath(t *testing.T, inboundId int) string {

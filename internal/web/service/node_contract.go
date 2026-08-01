@@ -1,10 +1,10 @@
-package service
+﻿package service
 
 import (
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
 )
 
 // NodeView is the browser/API read contract for nodes. Credentials are

@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"encoding/json"
@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/util/common"
+	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 )
 
 const defaultWireguardBase = "10.0.0.0/24"

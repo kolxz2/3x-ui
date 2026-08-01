@@ -1,4 +1,4 @@
-version: "2"
+﻿version: "2"
 
 run:
   build-tags: []
@@ -46,7 +46,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/mhsanaei/3x-ui
+        - github.com/kolxz2/3x-ui
   exclusions:
     paths:
       - frontend

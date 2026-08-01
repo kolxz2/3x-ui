@@ -1,4 +1,4 @@
-package websocket
+﻿package websocket
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/op/go-logging"
 
-	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
+	xuilogger "github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 func TestMain(m *testing.M) {

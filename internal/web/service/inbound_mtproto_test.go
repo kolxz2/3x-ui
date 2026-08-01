@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"encoding/hex"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func TestMtprotoRoutesThroughXray(t *testing.T) {

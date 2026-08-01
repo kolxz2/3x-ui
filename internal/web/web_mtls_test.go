@@ -1,4 +1,4 @@
-package web
+﻿package web
 
 import (
 	"crypto/tls"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
+	"github.com/kolxz2/3x-ui/v3/internal/util/crypto"
 )
 
 // TestPanelTLSAcceptsClientWithoutClientCert characterizes the invariant the

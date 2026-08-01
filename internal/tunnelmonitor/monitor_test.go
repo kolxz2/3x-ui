@@ -1,4 +1,4 @@
-package tunnelmonitor
+﻿package tunnelmonitor
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/op/go-logging"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 func TestMain(m *testing.M) {

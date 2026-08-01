@@ -1,14 +1,14 @@
-package job
+﻿package job
 
 import (
 	"encoding/json"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service/outbound"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service"
+	"github.com/kolxz2/3x-ui/v3/internal/web/service/outbound"
+	"github.com/kolxz2/3x-ui/v3/internal/web/websocket"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 
 	"github.com/valyala/fasthttp"
 )

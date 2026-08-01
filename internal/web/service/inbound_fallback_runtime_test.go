@@ -1,12 +1,12 @@
-package service
+﻿package service
 
 import (
 	"encoding/json"
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 // TestBuildRuntimeInboundForAPI_InjectsFallbacks is the #5963 regression: the

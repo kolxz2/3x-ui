@@ -1,4 +1,4 @@
-//go:build windows
+﻿//go:build windows
 
 package mtproto
 
@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
 )
 
 var (

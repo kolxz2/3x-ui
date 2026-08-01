@@ -1,4 +1,4 @@
-package sub
+﻿package sub
 
 import (
 	"encoding/base64"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/goccy/go-json"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
 )
 
 func TestApplyRemarkToLinkRewritesFragment(t *testing.T) {

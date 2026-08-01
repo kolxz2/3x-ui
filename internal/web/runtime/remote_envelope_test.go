@@ -1,4 +1,4 @@
-package runtime
+﻿package runtime
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/util/wirecodec"
+	"github.com/kolxz2/3x-ui/v3/internal/util/wirecodec"
 )
 
 // TestRemoteSendsEnvelopeWhenNodeAdvertisesCap: once a node has advertised the

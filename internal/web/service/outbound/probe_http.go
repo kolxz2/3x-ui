@@ -1,4 +1,4 @@
-package outbound
+﻿package outbound
 
 import (
 	"context"
@@ -18,9 +18,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/config"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
+	"github.com/kolxz2/3x-ui/v3/internal/config"
+	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/internal/xray"
 )
 
 // HTTP-mode probing works by spinning up ONE temporary xray instance per

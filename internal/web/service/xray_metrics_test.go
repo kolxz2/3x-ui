@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"path/filepath"
@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/eventbus"
 )
 
 // probe is one observatory sample: whether the outbound is alive and the
