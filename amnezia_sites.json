@@ -60,6 +60,10 @@
         "ip": "185.73.195.116"
     },
     {
+        "hostname": "cdn2.ozone.ru",
+        "ip": "185.73.195.117"
+    },
+    {
         "hostname": "chat-prod.wildberries.ru",
         "ip": "185.62.202.8"
     },
@@ -126,6 +130,10 @@
     {
         "hostname": "identical-products.wildberries.ru",
         "ip": "85.198.79.73"
+    },
+    {
+        "hostname": "ir-11.ozone.ru",
+        "ip": "79.135.238.114"
     },
     {
         "hostname": "ir.ozone.ru",
@@ -244,8 +252,12 @@
         "ip": "185.62.202.2"
     },
     {
+        "hostname": "www.avito.ru",
+        "ip": "176.114.124.24"
+    },
+    {
         "hostname": "www.ozon.ru",
-        "ip": "185.73.193.68"
+        "ip": "185.73.194.82"
     },
     {
         "hostname": "www.wildberries.by",
@@ -266,17 +278,5 @@
     {
         "hostname": "yastatic.net",
         "ip": "37.9.64.225"
-    },
-    {
-        "hostname": "ir-11.ozone.ru",
-        "ip": "79.135.238.114"
-    },
-    {
-        "hostname": "cdn2.ozone.ru",
-        "ip": "185.73.195.117"
-    },
-    {
-        "hostname": "www.ozon.ru",
-        "ip": "185.73.194.82"
     }
 ]
