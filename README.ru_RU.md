@@ -1,21 +1,8 @@
 ﻿[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
-  </picture>
-</p>
 
-<p align="center">
-  <a href="https://github.com/kolxz2/3x-ui/releases"><img src="https://img.shields.io/github/v/release/kolxz2/3x-ui" alt="Release"></a>
-  <a href="https://github.com/kolxz2/3x-ui/actions"><img src="https://img.shields.io/github/actions/workflow/status/kolxz2/3x-ui/release.yml.svg" alt="Build"></a>
-  <a href="#"><img src="https://img.shields.io/github/go-mod/go-version/kolxz2/3x-ui.svg" alt="GO Version"></a>
-  <a href="https://github.com/kolxz2/3x-ui/releases/latest"><img src="https://img.shields.io/github/downloads/kolxz2/3x-ui/total.svg" alt="Downloads"></a>
-  <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true" alt="License"></a>
-  <a href="https://pkg.go.dev/github.com/kolxz2/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/kolxz2/3x-ui/v3.svg" alt="Go Reference"></a>
-  <a href="https://goreportcard.com/report/github.com/kolxz2/3x-ui/v3"><img src="https://goreportcard.com/badge/github.com/kolxz2/3x-ui/v3" alt="Go Report Card"></a>
-</p>
+
+
 
 **3X-UI** — продвинутая веб-панель управления с открытым исходным кодом для управления серверами [Xray-core](https://github.com/XTLS/Xray-core). Она предоставляет аккуратный многоязычный интерфейс для развёртывания, настройки и мониторинга широкого спектра протоколов прокси и VPN — от одного VPS до развёртываний с несколькими узлами.
 
@@ -23,6 +10,8 @@
 
 > [!IMPORTANT]
 > Этот проект предназначен только для личного использования. Пожалуйста, не используйте его в незаконных целях или в производственной среде.
+
+
 
 ## Возможности
 
@@ -40,32 +29,21 @@
 - **13 языков интерфейса** с тёмной и светлой темами.
 - **Интеграция с Fail2ban** для применения лимитов IP по каждому клиенту.
 
+
+
 ## Скриншоты
 
-<details>
-<summary>Нажмите, чтобы развернуть</summary>
+Нажмите, чтобы развернуть
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
-</picture>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
-</picture>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
-</picture>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
-</picture>
 
-</details>
+
+
+
+
+
 
 ## Быстрый старт
 
@@ -94,10 +72,12 @@ bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh
 Установщик также работает в **неинтерактивном** режиме для cloud-init.
 Задайте `XUI_NONINTERACTIVE=1` (или передайте по конвейеру без TTY), и установка пройдёт от начала до конца
 без единого запроса: будут сгенерированы случайные учётные данные и записаны в
-`/etc/x-ui/install-result.env`. Смотрите [`deploy/`](deploy/) для:
+`/etc/x-ui/install-result.env`. Смотрите `[deploy/](deploy/)` для:
 
 - [Cloud-init user-data](deploy/cloud-init/) — автоматическая установка в любом облаке (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
 - [Заметки по Hetzner Cloud](deploy/marketplace/hetzner/) — развёртывание на Hetzner на базе cloud-init
+
+
 
 ## Поддерживаемые платформы
 
@@ -118,6 +98,8 @@ bash <(curl -Ls https://raw.githubusercontent.com/kolxz2/3x-ui/master/install.sh
 XUI_DB_TYPE=postgres
 XUI_DB_DSN=postgres://xui:password@127.0.0.1:5432/xui?sslmode=disable
 ```
+
+
 
 ### Перенос существующей установки SQLite в PostgreSQL
 
@@ -148,6 +130,8 @@ apt install sqlite3 -y
 sqlite3 --version
 ```
 
+
+
 #### 📂 2. Открыть базу 3X-UI
 
 Файл базы: `/etc/x-ui/x-ui.db`
@@ -155,6 +139,8 @@ sqlite3 --version
 ```bash
 sqlite3 /etc/x-ui/x-ui.db
 ```
+
+
 
 #### 🔍 3. Проверить, что всё в порядке
 
@@ -176,7 +162,7 @@ SELECT value FROM settings WHERE key='subJsonRules';
 
 #### ✏️ 5. Обновить rules (добавить домены)
 
-Подставьте свой JSON при необходимости. Пример синхронизирован с [`amnezia_sites.json`](amnezia_sites.json) (список Amnezia): каждый `hostname` → правило `domain:`, уникальные IP из файла — запасной вариант. Базовые правила: `2ip.ru` / `mp-raketa.ru` → proxy; `geoip:private` + `geoip:ru` и `geosite:category-ru` → direct; остальное → proxy.
+Подставьте свой JSON при необходимости. Пример синхронизирован с `[amnezia_sites.json](amnezia_sites.json)` (список Amnezia): каждый `hostname` → правило `domain:`, уникальные IP из файла — запасной вариант. Базовые правила: `2ip.ru` / `mp-raketa.ru` → proxy; `geoip:private` + `geoip:ru` и `geosite:category-ru` → direct; остальное → proxy.
 
 Пересобрать JSON после правки `amnezia_sites.json`: `node scripts/gen-sub-json-rules.mjs`
 
@@ -194,11 +180,15 @@ WHERE key='subJsonRules';
 .exit
 ```
 
+
+
 #### 🔄 7. Перезапустить 3X-UI
 
 ```bash
 systemctl restart x-ui
 ```
+
+
 
 ### Docker
 
@@ -214,26 +204,32 @@ docker compose --profile postgres up -d
 docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/kolxz2/3x-ui
 ```
 
+
+
 ## Переменные окружения
 
-| Переменная | Описание | По умолчанию |
-| --- | --- | --- |
-| `XUI_DB_TYPE` | Бэкенд базы данных: `sqlite` или `postgres` | `sqlite` |
-| `XUI_DB_DSN` | Строка подключения PostgreSQL (когда `XUI_DB_TYPE=postgres`) | — |
-| `XUI_DB_FOLDER` | Каталог для файла базы данных SQLite | `/etc/x-ui` |
-| `XUI_DB_MAX_OPEN_CONNS` | Максимум открытых соединений (пул PostgreSQL) | — |
-| `XUI_DB_MAX_IDLE_CONNS` | Максимум простаивающих соединений (пул PostgreSQL) | — |
-| `XUI_INIT_WEB_BASE_PATH` | Начальный URI-путь для веб-панели | `/` |
-| `XUI_ENABLE_FAIL2BAN` | Включить применение лимитов IP на основе Fail2ban | `true` |
-| `XUI_LOG_LEVEL` | Уровень логирования (`debug`, `info`, `warning`, `error`) | `info` |
-| `XUI_DEBUG` | Включить режим отладки | `false` |
-| `XUI_TUNNEL_HEALTH_MONITOR` | Включить монитор состояния туннеля (опрашивает URL и перезапускает xray после многократных сбоев; перезапуск отключает всех клиентов) | `false` |
-| `XUI_TUNNEL_HEALTH_PROXY` | Прокси, через который отправляется проба; укажите локальный входящий xray, чтобы проба проверяла туннель (например, `socks5://127.0.0.1:1080`). Пустое значение означает, что проба проверяет только связь с хостом | — |
-| `XUI_TUNNEL_HEALTH_URL` | URL, опрашиваемый для проверки состояния туннеля | `https://www.cloudflare.com/cdn-cgi/trace` |
-| `XUI_TUNNEL_HEALTH_INTERVAL` | Интервал между пробами | `30s` |
-| `XUI_TUNNEL_HEALTH_TIMEOUT` | Таймаут на одну пробу | `10s` |
-| `XUI_TUNNEL_HEALTH_FAILURES` | Число последовательных сбоев до запуска перезапуска | `3` |
-| `XUI_TUNNEL_HEALTH_COOLDOWN` | Минимальная задержка между последовательными перезапусками | `5m` |
+
+| Переменная                   | Описание                                                                                                                                                                                                            | По умолчанию                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `XUI_DB_TYPE`                | Бэкенд базы данных: `sqlite` или `postgres`                                                                                                                                                                         | `sqlite`                                   |
+| `XUI_DB_DSN`                 | Строка подключения PostgreSQL (когда `XUI_DB_TYPE=postgres`)                                                                                                                                                        | —                                          |
+| `XUI_DB_FOLDER`              | Каталог для файла базы данных SQLite                                                                                                                                                                                | `/etc/x-ui`                                |
+| `XUI_DB_MAX_OPEN_CONNS`      | Максимум открытых соединений (пул PostgreSQL)                                                                                                                                                                       | —                                          |
+| `XUI_DB_MAX_IDLE_CONNS`      | Максимум простаивающих соединений (пул PostgreSQL)                                                                                                                                                                  | —                                          |
+| `XUI_INIT_WEB_BASE_PATH`     | Начальный URI-путь для веб-панели                                                                                                                                                                                   | `/`                                        |
+| `XUI_ENABLE_FAIL2BAN`        | Включить применение лимитов IP на основе Fail2ban                                                                                                                                                                   | `true`                                     |
+| `XUI_LOG_LEVEL`              | Уровень логирования (`debug`, `info`, `warning`, `error`)                                                                                                                                                           | `info`                                     |
+| `XUI_DEBUG`                  | Включить режим отладки                                                                                                                                                                                              | `false`                                    |
+| `XUI_TUNNEL_HEALTH_MONITOR`  | Включить монитор состояния туннеля (опрашивает URL и перезапускает xray после многократных сбоев; перезапуск отключает всех клиентов)                                                                               | `false`                                    |
+| `XUI_TUNNEL_HEALTH_PROXY`    | Прокси, через который отправляется проба; укажите локальный входящий xray, чтобы проба проверяла туннель (например, `socks5://127.0.0.1:1080`). Пустое значение означает, что проба проверяет только связь с хостом | —                                          |
+| `XUI_TUNNEL_HEALTH_URL`      | URL, опрашиваемый для проверки состояния туннеля                                                                                                                                                                    | `https://www.cloudflare.com/cdn-cgi/trace` |
+| `XUI_TUNNEL_HEALTH_INTERVAL` | Интервал между пробами                                                                                                                                                                                              | `30s`                                      |
+| `XUI_TUNNEL_HEALTH_TIMEOUT`  | Таймаут на одну пробу                                                                                                                                                                                               | `10s`                                      |
+| `XUI_TUNNEL_HEALTH_FAILURES` | Число последовательных сбоев до запуска перезапуска                                                                                                                                                                 | `3`                                        |
+| `XUI_TUNNEL_HEALTH_COOLDOWN` | Минимальная задержка между последовательными перезапусками                                                                                                                                                          | `5m`                                       |
+
+
+
 
 ## Поддерживаемые языки
 
@@ -243,7 +239,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## Форк: обновление и релизы
 
-Этот репозиторий — форк [MHSanaei/3x-ui](https://github.com/MHSanaei/3x-ui). Ниже — как подтянуть изменения из оригинала и как публиковать сборки через GitHub Actions ([`release.yml`](/.github/workflows/release.yml)) для **вашего форка** (`kolxz2/3x-ui`).
+Этот репозиторий — форк [MHSanaei/3x-ui](https://github.com/MHSanaei/3x-ui). Ниже — как подтянуть изменения из оригинала и как публиковать сборки через GitHub Actions (`[release.yml](/.github/workflows/release.yml)`) для **вашего форка** (`kolxz2/3x-ui`).
 
 ### Обновить форк из upstream
 
@@ -296,7 +292,7 @@ git push origin main
 
 При конфликтах слияния разрешите их, сделайте commit и снова выполните `git push origin main`.
 
-**Вариант 2 — rebase (линейная история).** Скрипт [`tools/rebase-upstream.ps1`](tools/rebase-upstream.ps1) подтягивает `upstream/main`, сохраняет `README.ru_RU.md` и ваши строки в `.gitignore`, при остальных конфликтах берёт изменения upstream.
+**Вариант 2 — rebase (линейная история).** Скрипт `[tools/rebase-upstream.ps1](tools/rebase-upstream.ps1)` подтягивает `upstream/main`, сохраняет `README.ru_RU.md` и ваши строки в `.gitignore`, при остальных конфликтах берёт изменения upstream.
 
 ```powershell
 powershell -NoProfile -File tools/rebase-upstream.ps1
@@ -304,28 +300,23 @@ powershell -NoProfile -File tools/rebase-upstream.ps1
 
 История переписана, поэтому обычный `git push` на origin не пройдёт. Нужен `git push --force-with-lease` — только если вы сами этого хотите.
 
-Код upstream лежит в `internal/` (не в старых каталогах `web/`, `database/`, `xray/`). Файл версии: [`internal/config/version`](internal/config/version).
+Код upstream лежит в `internal/` (не в старых каталогах `web/`, `database/`, `xray/`). Файл версии: `[internal/config/version](internal/config/version)`.
 
 ### Опубликовать релиз с бинарниками
 
 **Создавать Release вручную в интерфейсе GitHub не обязательно.** Workflow **Release 3X-UI** собирает архивы для Linux/Windows и прикрепляет их к релизу после **push тега версии**.
 
-1. Обновите версию в [`internal/config/version`](internal/config/version) (должна совпадать с тегом, **без** префикса `v`) и закоммитьте изменения.
+1. Обновите версию в `[internal/config/version](internal/config/version)` (должна совпадать с тегом, **без** префикса `v`) и закоммитьте изменения.
 2. Отправьте на форк:
-
-   ```bash
+  ```bash
    git push origin main
-   ```
-
-3. Создайте и запушьте тег с префиксом **`v`** (это требование workflow), например `v3.6.0`:
-
-   ```bash
-   git tag v3.6.0
+  ```
+3. Создайте и запушьте тег с префиксом `v` (это требование workflow), например `v3.6.0`:
+  ```bash
+  3.7.0.2
    git push origin v3.6.0
-   ```
-
+  ```
    Теги вида `3.6.0` **без** `v` **не** загрузят файлы в [Releases](https://github.com/kolxz2/3x-ui/releases).
-
 4. Дождитесь завершения workflow во вкладке [Actions](https://github.com/kolxz2/3x-ui/actions) (~10–15 минут). Затем откройте **Releases** — там должны появиться `x-ui-linux-amd64.tar.gz`, `x-ui-windows-amd64.zip` и другие платформы.
 
 Workflow также запускается при push в `main`, если менялись `.go`, `go.mod`, `frontend/`, `*.sh` и т.п.; тогда артефакты лежат только в **Actions → Artifacts**. **На страницу Releases файлы попадают только при push тега** (`refs/tags/v…`).
@@ -340,30 +331,32 @@ Workflow также запускается при push в `main`, если ме�
 
 - [alireza0](https://github.com/alireza0/)
 
+
+
 ## Благодарности
 
-- [Iran v2ray rules](https://github.com/chocolate4u/Iran-v2ray-rules) (Лицензия: **GPL-3.0**): _Улучшенные правила маршрутизации для v2ray/xray и v2ray/xray-clients со встроенными иранскими доменами и фокусом на безопасность и блокировку рекламы._
-- [Russia v2ray rules](https://github.com/runetfreedom/russia-v2ray-rules-dat) (Лицензия: **GPL-3.0**): _Этот репозиторий содержит автоматически обновляемые правила маршрутизации V2Ray на основе данных о заблокированных доменах и адресах в России._
+- [Iran v2ray rules](https://github.com/chocolate4u/Iran-v2ray-rules) (Лицензия: **GPL-3.0**): *Улучшенные правила маршрутизации для v2ray/xray и v2ray/xray-clients со встроенными иранскими доменами и фокусом на безопасность и блокировку рекламы.*
+- [Russia v2ray rules](https://github.com/runetfreedom/russia-v2ray-rules-dat) (Лицензия: **GPL-3.0**): *Этот репозиторий содержит автоматически обновляемые правила маршрутизации V2Ray на основе данных о заблокированных доменах и адресах в России.*
+
+
 
 ## Инструменты сообщества
 
 Инструменты и интеграции, созданные сообществом вокруг 3x-ui.
 
-- [terraform-provider-3x-ui](https://github.com/batonogov/terraform-provider-threexui) (Лицензия: **MIT**): _Управление входящими, клиентами, настройками панели и конфигурацией Xray через код с помощью Terraform / OpenTofu._
+- [terraform-provider-3x-ui](https://github.com/batonogov/terraform-provider-threexui) (Лицензия: **MIT**): *Управление входящими, клиентами, настройками панели и конфигурацией Xray через код с помощью Terraform / OpenTofu.*
+
+
 
 ## Поддержка проекта
 
 **Если этот проект полезен для вас, вы можете поставить ему**:star2:
 
-<a href="https://www.buymeacoffee.com/kolxz2" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
-</a>
 
-</br>
-<a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
-</a>
+
+  
+
 
 ## Звезды с течением времени
 
-[![Stargazers over time](https://starchart.cc/kolxz2/3x-ui.svg?variant=adaptive)](https://starchart.cc/kolxz2/3x-ui)
+[Stargazers over time](https://starchart.cc/kolxz2/3x-ui)
