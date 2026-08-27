@@ -9,8 +9,8 @@ import (
 	"github.com/goccy/go-json"
 	yaml "github.com/goccy/go-yaml"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 )
 
 type SubClashService struct {

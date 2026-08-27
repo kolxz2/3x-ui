@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/json_util"
-	"github.com/mhsanaei/3x-ui/v3/internal/util/random"
-	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/kolxz2/3x-ui/v3/internal/database"
+	"github.com/kolxz2/3x-ui/v3/internal/database/model"
+	"github.com/kolxz2/3x-ui/v3/internal/logger"
+	"github.com/kolxz2/3x-ui/v3/internal/util/json_util"
+	"github.com/kolxz2/3x-ui/v3/internal/util/random"
+	wgutil "github.com/kolxz2/3x-ui/v3/internal/util/wireguard"
 )
 
 //go:embed default.json

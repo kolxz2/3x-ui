@@ -243,7 +243,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## Форк: обновление и релизы
 
-Этот репозиторий — форк [MHSanaei/3x-ui](https://github.com/kolxz2/3x-ui). Ниже — как подтянуть изменения из оригинала и как публиковать сборки через GitHub Actions ([`release.yml`](/.github/workflows/release.yml)) для **вашего форка** (`kolxz2/3x-ui`).
+Этот репозиторий — форк [MHSanaei/3x-ui](https://github.com/MHSanaei/3x-ui). Ниже — как подтянуть изменения из оригинала и как публиковать сборки через GitHub Actions ([`release.yml`](/.github/workflows/release.yml)) для **вашего форка** (`kolxz2/3x-ui`).
 
 ### Обновить форк из upstream
 
@@ -256,7 +256,7 @@ git remote -v
 Если `upstream` ещё нет, добавьте оригинальный репозиторий:
 
 ```bash
-git remote add upstream https://github.com/kolxz2/3x-ui.git
+git remote add upstream https://github.com/MHSanaei/3x-ui.git
 ```
 
 Проверьте:
@@ -270,8 +270,8 @@ git remote -v
 ```text
 origin    https://github.com/kolxz2/3x-ui.git (fetch)
 origin    https://github.com/kolxz2/3x-ui.git (push)
-upstream  https://github.com/kolxz2/3x-ui.git (fetch)
-upstream  https://github.com/kolxz2/3x-ui.git (push)
+upstream  https://github.com/MHSanaei/3x-ui.git (fetch)
+upstream  https://github.com/MHSanaei/3x-ui.git (push)
 ```
 
 Загрузите последние изменения из оригинала:
@@ -296,15 +296,13 @@ git push origin main
 
 При конфликтах слияния разрешите их, сделайте commit и снова выполните `git push origin main`.
 
-**Вариант 2 — rebase (линейная история).** Только если вы уверенно работаете с rebase:
+**Вариант 2 — rebase (линейная история).** Скрипт [`tools/rebase-upstream.ps1`](tools/rebase-upstream.ps1) подтягивает `upstream/main`, сохраняет `README.ru_RU.md` и ваши строки в `.gitignore`, при остальных конфликтах берёт изменения upstream.
 
-```bash
-git checkout main
-git rebase upstream/main
-git push origin main
+```powershell
+powershell -NoProfile -File tools/rebase-upstream.ps1
 ```
 
-Если `main` уже был на GitHub, после rebase может понадобиться `git push --force-with-lease origin main` — используйте это только когда намеренно переписываете историю на remote.
+История переписана, поэтому обычный `git push` на origin не пройдёт. Нужен `git push --force-with-lease` — только если вы сами этого хотите.
 
 Код upstream лежит в `internal/` (не в старых каталогах `web/`, `database/`, `xray/`). Файл версии: [`internal/config/version`](internal/config/version).
 
